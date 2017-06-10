@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Batch Uninstaller</string>
+    <string name="dont_show_again">Don\'t show again</string>
+    <string name="root_check_content">Congratulations! Your phone is rooted.\n We will ask for the root permission next. If you choose to deny it, the app will still work, but there will be a prompt before each app is uninstalled.\nUnfortunately, this is a limitation of the Android system</string>
+    <string name="about">About</string>
+    <string name="feedback">Feedback</string>
+    <string name="rate">Rate Us</string>
+    <string name="donate">Donate</string>
+    <string name="send_email">Send email...</string>
+    <string name="understood">Understood</string>
+    <string name="granted">Granted permission</string>
+    <string name="denied">Permission denied</string>
+    <string name="non_root_content">Your app is not rooted. The app will still work, but there will be a prompt before each app is uninstalled. Unfortunately, this is a limitation of the Android system However, this process will still be faster than uninstalling them from the settings menu</string>
+    <string name="uninstall_confirmation">Are you sure you want to uninstall these app(s)?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="uninstall_complete">Uninstallation complete</string>
+    <string name="sort">Sort</string>
+
+    <string-array name="sort">
+        <item>By Name (ASC)</item>
+        <item>By Name (DESC)</item>
+        <item>By Size (ASC)</item>
+        <item>By Size (DESC)</item>
+    </string-array>
+</resources>

@@ -16,7 +16,7 @@
 
         <ImageButton
             android:id="@+id/back"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:foregroundGravity="center_vertical"
@@ -30,19 +30,29 @@
             android:layout_toRightOf="@+id/back"
             android:text="@string/app_name"
             android:textColor="@color/textColorSecondary"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/free_size"
             android:text="135 MB"
             android:textColor="@color/textColorSecondary"
-            android:textSize="15sp"
+            android:textSize="16sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="5dp"
+            android:layout_toLeftOf="@+id/delete"/>
+
+        <ImageButton
+            android:id="@+id/delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:foregroundGravity="center_vertical"
+            android:background="@color/colorPrimary"
+            android:layout_marginRight="5dp"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"/>
+            android:layout_alignParentRight="true"
+            android:src="@drawable/ic_delete_white_24dp"/>
 
     </RelativeLayout>
 

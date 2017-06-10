@@ -69,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TextView free_size_tv;
     private List<String> free_apps;
-    private ImageButton back;
-    private FloatingActionButton delete, sort;
+    private ImageButton back, delete;
+    private FloatingActionButton sort;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
@@ -85,16 +85,15 @@ public class MainActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         free_size_tv = (TextView) findViewById(R.id.free_size);
         back = (ImageButton) findViewById(R.id.back);
+        delete = (ImageButton) findViewById(R.id.delete);
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        delete = (FloatingActionButton) findViewById(R.id.delete);
         sort = (FloatingActionButton) findViewById(R.id.sort);
 
         free_size_tv.setVisibility(View.INVISIBLE);
         back.setVisibility(View.GONE);
-        setSupportActionBar(toolbar);
-
         delete.setVisibility(View.GONE);
+        setSupportActionBar(toolbar);
 
         if (!sharedPreferences.getBoolean("ask_again", false)) {
             if (checkForRoot()) {
@@ -171,12 +170,13 @@ public class MainActivity extends AppCompatActivity {
 
                 if (free_apps.size() == 0) {
                     back.setVisibility(View.GONE);
+                    delete.setVisibility(View.GONE);
                     free_size_tv.setVisibility(View.INVISIBLE);
                     sort.setVisibility(View.VISIBLE);
                 } else {
+                    delete.setVisibility(View.VISIBLE);
                     back.setVisibility(View.VISIBLE);
                     free_size_tv.setVisibility(View.VISIBLE);
-                    delete.setVisibility(View.VISIBLE);
                     sort.setVisibility(View.INVISIBLE);
                     long total_bytes = 0;
                     for (String pkg : free_apps) {
@@ -245,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
                                     adapter.notifyDataSetChanged();
                                 }
                                 free_apps.clear();
+                                delete.setVisibility(View.GONE);
                                 back.setVisibility(View.GONE);
                                 delete.setVisibility(View.INVISIBLE);
                                 free_size_tv.setVisibility(View.INVISIBLE);
@@ -325,8 +326,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (dy > 0) {
-                    if (free_apps.size() == 0)
-                        delete.hide();
                     sort.hide();
                 } else if (dy < 0) {
                     if (free_apps.size() == 0)
@@ -385,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
                         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
                         recyclerView.setAdapter(adapter);
                         back.setVisibility(View.GONE);
-                        delete.setVisibility(View.INVISIBLE);
+                        delete.setVisibility(View.GONE);
                         free_size_tv.setVisibility(View.INVISIBLE);
                         sort.setVisibility(View.VISIBLE);
                         free_apps.clear();

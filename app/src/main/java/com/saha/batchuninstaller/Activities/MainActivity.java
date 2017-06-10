@@ -157,6 +157,20 @@ public class MainActivity extends AppCompatActivity {
                 this, new RVHItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
+
+                if(apps.get(position).system_app && free_apps.contains(apps.get(position).package_name))
+                {
+                    if(!RootManager.getInstance().obtainPermission())
+                    {
+                        Toast.makeText(getApplicationContext(),R.string.no_root_system_app,Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        Toast.makeText(getApplicationContext(),R.string.root_system_app, Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+
                 apps.get(position).color = (
                         apps.get(position).color == R.color.backgroundSelected
                 ) ? R.color.backgroundPrimary : R.color.backgroundSelected;
@@ -380,9 +394,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        adapter = new AppInfoAdapter(getApplicationContext(), apps);
-                        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                        recyclerView.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
                         back.setVisibility(View.GONE);
                         delete.setVisibility(View.GONE);
                         free_size_tv.setVisibility(View.INVISIBLE);

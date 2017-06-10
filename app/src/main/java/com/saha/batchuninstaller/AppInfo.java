@@ -28,6 +28,7 @@ public class AppInfo {
     public Bitmap icon;
     public long file_size;
     public String app_name;
+    public boolean system_app;
 
     public AppInfo(String package_name, Context context) {
         this.package_name = package_name;
@@ -35,5 +36,6 @@ public class AppInfo {
         file_size = PackageUtils.getApkSize(context, package_name);
         app_name = PackageUtils.getAppName(context, package_name);
         color = R.color.backgroundPrimary;
+        system_app = PackageUtils.isSystemApp(context, package_name);
     }
 }

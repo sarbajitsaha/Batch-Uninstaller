@@ -19,6 +19,7 @@ package com.saha.batchuninstaller.Helpers;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -48,6 +49,20 @@ public class PackageUtils {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmapResized;
+    }
+
+    public static boolean isSystemApp(Context context, String packageName) {
+        try {
+            PackageManager pm = context.getPackageManager();
+            PackageInfo targetPkgInfo = pm.getPackageInfo(
+                    packageName, PackageManager.GET_SIGNATURES);
+            PackageInfo sys = pm.getPackageInfo(
+                    "android", PackageManager.GET_SIGNATURES);
+            return (targetPkgInfo != null && targetPkgInfo.signatures != null && sys.signatures[0]
+                    .equals(targetPkgInfo.signatures[0]));
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     public static Bitmap getIcon(Context context, String package_name) {

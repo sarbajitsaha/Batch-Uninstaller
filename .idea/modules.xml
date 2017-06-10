@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/BatchUninstaller.iml" filepath="$PROJECT_DIR$/BatchUninstaller.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Batch-Uninstaller.iml" filepath="$PROJECT_DIR$/Batch-Uninstaller.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

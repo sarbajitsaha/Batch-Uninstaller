@@ -16,6 +16,10 @@
     <string name="no">No</string>
     <string name="uninstall_complete">Uninstallation complete</string>
     <string name="sort">Sort</string>
+    <string name="about_text">Simple batch uninstaller app to uninstall multiple apps at once. Works best if rooted\n\nThis app is open source. Check out the source code at https://github.com/sarbajitsaha/Batch-Uninstaller</string>
+    <string name="copy">Copy Address</string>
+    <string name="donate_content">If you find this app useful, you can donate via Bitcoin. Donation doesn\'t provide any additional benefits.Press the button below to copy the bitcoin address to your clipboard</string>
+    <string name="copy_successful">Bitcoin Address copied to clipboard</string>
 
     <string-array name="sort">
         <item>By Name (ASC)</item>

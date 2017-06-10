@@ -18,6 +18,9 @@
 package com.saha.batchuninstaller.Activities;
 
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -239,7 +242,6 @@ public class MainActivity extends AppCompatActivity {
                                         apps.remove(index);
                                     adapter.notifyDataSetChanged();
                                 }
-                                Toast.makeText(getApplicationContext(), R.string.uninstall_complete, Toast.LENGTH_SHORT).show();
                                 free_apps.clear();
                                 back.setVisibility(View.GONE);
                                 delete.setVisibility(View.INVISIBLE);
@@ -353,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
                 rate();
                 return true;
             case R.id.donate:
-                //donate();
+                donate();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -417,14 +419,24 @@ public class MainActivity extends AppCompatActivity {
     private void about() {
         new MaterialDialog.Builder(MainActivity.this)
                 .title(R.string.about)
-                .content("Simple batch uninstaller app to uninstall multiple apps at once. Works best on a rooted phone")
+                .content(R.string.about_text)
                 .show();
     }
 
     private void donate() {
         new MaterialDialog.Builder(MainActivity.this)
                 .title(R.string.donate)
-                .content("If you find this app useful, you can donate via Bitcoin. Donation doesn't provide any additional benefits.")
+                .content(R.string.donate_content)
+                .positiveText(R.string.copy)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("Bitcoin Address", "3GRYNKRUFsefuvKuTycgbMjB4DFxUXVys4");
+                        clipboard.setPrimaryClip(clip);
+                        Toast.makeText(getApplicationContext(),R.string.copy_successful,Toast.LENGTH_SHORT).show();
+                    }
+                })
                 .show();
     }
 }

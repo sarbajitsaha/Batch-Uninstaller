@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         if (!sharedPreferences.getBoolean("ask_again", false)) {
             if (checkForRoot()) {
                 new MaterialDialog.Builder(MainActivity.this)
+                        .title(R.string.important)
                         .content(R.string.root_check_content)
                         .neutralText(R.string.understood)
                         .onAny(new MaterialDialog.SingleButtonCallback() {
@@ -118,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
                         .show();
             } else {
                 new MaterialDialog.Builder(MainActivity.this)
+                        .title(R.string.important)
                         .content(R.string.non_root_content)
                         .neutralText(R.string.understood)
                         .checkBoxPromptRes(R.string.dont_show_again, false, null)
@@ -227,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
                                     if (RootManager.getInstance().obtainPermission()) {
                                         Result res = RootManager.getInstance().runCommand("pm uninstall " + free_apps.get(i));
                                         if (res.getMessage().toLowerCase().contains("success")) {
-                                            count++;
+                                            Toast.makeText(getApplicationContext(),"Uninstalled "+apps.get(index).app_name,Toast.LENGTH_SHORT).show();
                                         } else {
                                             Toast.makeText(getApplicationContext(), "Failed to uninstall " + apps.get(index).app_name, Toast.LENGTH_SHORT).show();
 
@@ -420,6 +422,14 @@ public class MainActivity extends AppCompatActivity {
         new MaterialDialog.Builder(MainActivity.this)
                 .title(R.string.about)
                 .content(R.string.about_text)
+                .positiveText(R.string.github)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW,Uri.parse("https://github.com/sarbajitsaha/Batch-Uninstaller"));
+                        startActivity(intent);
+                    }
+                })
                 .show();
     }
 

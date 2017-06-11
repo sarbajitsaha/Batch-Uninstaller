@@ -10,18 +10,18 @@ An Android app that allows uninstallation of multiple app at once (only if root 
 
 ## Description
 
-Ever hit that share button and really wanted to just store the file on your phone? 
-That meme that you send to your friends that would be great in your reaction image folder. 
-That screenshot of that Snapchat that you want to hide in a secret folder. 
+Batch Uninstaller allows you to uninstall multiple apps at once. If root permission is not available, you can still delete multiple apps a lot quicker than you can using the native android implementation.
+ 
+However, you will be prompted for each app uninstalled. Non Root users can not uninstall system apps. This is a limitation with the Android Operating system.
 
-Well look no further! 
-
-Set up any number of locations on your mobile, and save to them with a single click when using Android's share feature.
 
 ## Features
 
+* Uninstall multiple apps at once
 * Sort by date, name and size
 * Filter by user and system apps
+* Know how much space you are freeing up during the selection process.
+* Displays application name, install date and size
 
 ## Todo
 
@@ -35,7 +35,6 @@ If you can't see a similar request, [request yours](https://github.com/sarbajits
 
 
 ## License
-
 
 Batch Uninstaller is licensed under the GPL, version 3. A copy of the license is
 included in [LICENSE.txt](LICENSE.txt).

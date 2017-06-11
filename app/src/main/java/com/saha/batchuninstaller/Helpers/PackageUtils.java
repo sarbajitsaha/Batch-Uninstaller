@@ -65,6 +65,14 @@ public class PackageUtils {
         }
     }
 
+    public static long getInstalledDate(Context context, String packageName) {
+        try {
+            return context.getPackageManager().getPackageInfo(packageName, PackageManager.GET_META_DATA).firstInstallTime;
+        } catch (PackageManager.NameNotFoundException e) {
+            return 0;
+        }
+    }
+
     public static Bitmap getIcon(Context context, String package_name) {
         try {
             Drawable icon = context.getPackageManager().getApplicationIcon(package_name);

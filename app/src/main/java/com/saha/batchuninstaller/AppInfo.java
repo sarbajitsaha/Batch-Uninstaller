@@ -24,18 +24,20 @@ import com.saha.batchuninstaller.Helpers.PackageUtils;
 
 public class AppInfo {
     public int color;
-    public String package_name;
+    public String packageName;
     public Bitmap icon;
-    public long file_size;
-    public String app_name;
-    public boolean system_app;
+    public long fileSize;
+    public String appName;
+    public boolean systemApp;
+    public long firstInstallTime;
 
-    public AppInfo(String package_name, Context context) {
-        this.package_name = package_name;
-        icon = PackageUtils.getIcon(context, package_name);
-        file_size = PackageUtils.getApkSize(context, package_name);
-        app_name = PackageUtils.getAppName(context, package_name);
+    public AppInfo(String packageName, Context context) {
+        this.packageName = packageName;
+        icon = PackageUtils.getIcon(context, packageName);
+        fileSize = PackageUtils.getApkSize(context, packageName);
+        appName = PackageUtils.getAppName(context, packageName);
+        systemApp = PackageUtils.isSystemApp(context, packageName);
+        firstInstallTime = PackageUtils.getInstalledDate(context, packageName);
         color = R.color.backgroundPrimary;
-        system_app = PackageUtils.isSystemApp(context, package_name);
     }
 }

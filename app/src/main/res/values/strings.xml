@@ -30,5 +30,7 @@
         <item>By Name (DESC)</item>
         <item>By Size (ASC)</item>
         <item>By Size (DESC)</item>
+        <item>By Installed Date (ASC)</item>
+        <item>By Installed Date (DESC)</item>
     </string-array>
 </resources>

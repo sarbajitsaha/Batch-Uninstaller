@@ -18,9 +18,8 @@
 package com.saha.batchuninstaller.Adapters;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,18 +30,20 @@ import android.widget.TextView;
 import com.saha.batchuninstaller.AppInfo;
 import com.saha.batchuninstaller.R;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import github.nisrulz.recyclerviewhelper.RVHAdapter;
 import github.nisrulz.recyclerviewhelper.RVHViewHolder;
 
 public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.ItemViewHolder> implements RVHAdapter {
-    private List<AppInfo> apps;
-    private Context context;
+    private List<AppInfo> mAppsList;
+    private Context mContext;
 
     public AppInfoAdapter(Context context, List<AppInfo> apps) {
-        this.context = context;
-        this.apps = apps;
+        mContext = context;
+        mAppsList = apps;
     }
 
     @Override
@@ -53,15 +54,19 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.ItemView
 
     @Override
     public void onBindViewHolder(ItemViewHolder holder, int position) {
-        holder.layout.setBackgroundColor(context.getResources().getColor(apps.get(position).color));
-        holder.icon.setImageBitmap(apps.get(position).icon);
-        holder.app_name.setText(apps.get(position).app_name);
-        holder.app_size.setText(android.text.format.Formatter.formatShortFileSize(context, apps.get(position).file_size));
+        holder.mLayoutItem.setBackgroundColor(mContext.getResources().getColor(mAppsList.get(position).color));
+        holder.mImgIcon.setImageBitmap(mAppsList.get(position).icon);
+        holder.mTvAppName.setText(mAppsList.get(position).appName);
+        holder.mTvAppSize.setText(Formatter.formatShortFileSize(mContext, mAppsList.get(position).fileSize));
+
+        Date date=new Date(mAppsList.get(position).firstInstallTime);
+        SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yy");
+        holder.mTvAppDate.setText(df2.format(date));
     }
 
     @Override
     public int getItemCount() {
-        return apps.size();
+        return mAppsList.size();
     }
 
     @Override
@@ -71,26 +76,28 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.ItemView
 
     @Override
     public void onItemDismiss(int position, int direction) {
-        String pkg_name = apps.get(position).package_name;
-        apps.remove(position);
+        /*String pkg_name = mAppsList.get(position).packageName;
+        mAppsList.remove(position);
         notifyItemRemoved(position);
         Uri packageUri = Uri.parse("package:" + pkg_name);
         Intent uninstallIntent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri);
         uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(uninstallIntent);
+        mContext.startActivity(uninstallIntent);*/
+        notifyDataSetChanged();
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder implements RVHViewHolder {
-        RelativeLayout layout;
-        TextView app_name, app_size;
-        ImageView icon;
+        RelativeLayout mLayoutItem;
+        TextView mTvAppName, mTvAppSize, mTvAppDate;
+        ImageView mImgIcon;
 
         public ItemViewHolder(View itemView) {
             super(itemView);
-            app_name = (TextView) itemView.findViewById(R.id.app_name);
-            app_size = (TextView) itemView.findViewById(R.id.app_size);
-            icon = (ImageView) itemView.findViewById(R.id.icon_img);
-            layout = (RelativeLayout) itemView.findViewById(R.id.layout);
+            mTvAppName = (TextView) itemView.findViewById(R.id.tv_appname);
+            mTvAppSize = (TextView) itemView.findViewById(R.id.tv_appsize);
+            mTvAppDate = (TextView) itemView.findViewById(R.id.tv_date);
+            mImgIcon = (ImageView) itemView.findViewById(R.id.img_icon);
+            mLayoutItem = (RelativeLayout) itemView.findViewById(R.id.layout_appitem);
         }
 
         @Override

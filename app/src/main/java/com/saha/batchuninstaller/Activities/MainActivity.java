@@ -34,6 +34,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.format.Formatter;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -64,41 +65,50 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private RecyclerView recyclerView;
-    private AppInfoAdapter adapter;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private List<AppInfo> apps;
-    private List<String> pkgs;
-    private Toolbar toolbar;
-    private TextView free_size_tv;
-    private List<String> free_apps;
-    private ImageButton back, delete;
-    private FloatingActionButton sort;
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
+    private RecyclerView mRvAppList;
+    private AppInfoAdapter mAdapter;
+    private SwipeRefreshLayout mSwipeLayout;
+    private List<AppInfo> mApps;
+    private List<String> mPkgs;
+    private TextView mTvFreeSize;
+    private List<String> mFreeApps;
+    private ImageButton mImgBtnBack, mImgBtnDelete;
+    private FloatingActionButton mFabSort, mFabFilter;
+    private SharedPreferences mPrefs;
+    private SharedPreferences.Editor mEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        editor = sharedPreferences.edit();
+        //local variables
+        Toolbar mToolbar;
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        free_size_tv = (TextView) findViewById(R.id.free_size);
-        back = (ImageButton) findViewById(R.id.imgbtn_back);
-        delete = (ImageButton) findViewById(R.id.delete);
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        sort = (FloatingActionButton) findViewById(R.id.sort);
+        //link xml ids
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mTvFreeSize = (TextView) findViewById(R.id.tv_free_size);
+        mImgBtnBack = (ImageButton) findViewById(R.id.imgbtn_back);
+        mImgBtnDelete = (ImageButton) findViewById(R.id.imgbtn_delete);
+        mSwipeLayout = (SwipeRefreshLayout) findViewById(R.id.layout_swiperefresh);
+        mRvAppList = (RecyclerView) findViewById(R.id.rv_applist);
+        mFabSort = (FloatingActionButton) findViewById(R.id.fab_sort);
+        mFabFilter = (FloatingActionButton) findViewById(R.id.fab_filter);
 
-        free_size_tv.setVisibility(View.INVISIBLE);
-        back.setVisibility(View.GONE);
-        delete.setVisibility(View.GONE);
-        setSupportActionBar(toolbar);
+        //initialization
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        mEditor = mPrefs.edit();
+        mApps = new ArrayList<>();
+        mFreeApps = new ArrayList<>();
 
-        if (!sharedPreferences.getBoolean("ask_again", false)) {
+        //toolbar icons visibility
+        mTvFreeSize.setVisibility(View.INVISIBLE);
+        mImgBtnBack.setVisibility(View.GONE);
+        mImgBtnDelete.setVisibility(View.GONE);
+        setSupportActionBar(mToolbar);
+
+        //show dialog for root and non-root phones. If root ask for permission
+        if (!mPrefs.getBoolean("ask_again", false)) {
             if (checkForRoot()) {
                 new MaterialDialog.Builder(MainActivity.this)
                         .title(R.string.important)
@@ -107,9 +117,8 @@ public class MainActivity extends AppCompatActivity {
                         .onAny(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                editor.putBoolean("ask_again", dialog.isPromptCheckBoxChecked());
-                                editor.commit();
-
+                                mEditor.putBoolean("ask_again", dialog.isPromptCheckBoxChecked());
+                                mEditor.commit();
                                 if (RootManager.getInstance().obtainPermission()) {
                                     Toast.makeText(getApplicationContext(), R.string.granted, Toast.LENGTH_SHORT).show();
                                 } else {
@@ -128,78 +137,73 @@ public class MainActivity extends AppCompatActivity {
                         .onAny(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                editor.putBoolean("ask_again", dialog.isPromptCheckBoxChecked());
-                                editor.commit();
+                                mEditor.putBoolean("ask_again", dialog.isPromptCheckBoxChecked());
+                                mEditor.commit();
                             }
                         })
                         .show();
             }
         }
 
-        apps = new ArrayList<>();
-        free_apps = new ArrayList<>();
 
-        pkgs = PackageUtils.getPackageNames(getApplicationContext());
-        for (String pkg : pkgs) {
-            apps.add(new AppInfo(pkg, getApplicationContext()));
+        //populate lists with installed apps and details
+        mPkgs = PackageUtils.getPackageNames(getApplicationContext());
+        for (String pkg : mPkgs) {
+            mApps.add(new AppInfo(pkg, getApplicationContext()));
         }
 
-        adapter = new AppInfoAdapter(getApplicationContext(), apps);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
+        mAdapter = new AppInfoAdapter(getApplicationContext(), mApps);
+        mRvAppList.setLayoutManager(new LinearLayoutManager(this));
+        mRvAppList.setAdapter(mAdapter);
 
         ItemTouchHelper.Callback callback = new RVHItemTouchHelperCallback(
-                adapter, true, true, true);
+                mAdapter, true, true, true);
         ItemTouchHelper helper = new ItemTouchHelper(callback);
-        helper.attachToRecyclerView(recyclerView);
+        helper.attachToRecyclerView(mRvAppList);
 
-        recyclerView.addItemDecoration(
+        mRvAppList.addItemDecoration(
                 new RVHItemDividerDecoration(this, LinearLayoutManager.VERTICAL));
 
-        recyclerView.addOnItemTouchListener(new RVHItemClickListener(
+        mRvAppList.addOnItemTouchListener(new RVHItemClickListener(
                 this, new RVHItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-
-                if(apps.get(position).system_app && free_apps.contains(apps.get(position).package_name))
-                {
-                    if(!RootManager.getInstance().obtainPermission())
-                    {
-                        Toast.makeText(getApplicationContext(),R.string.no_root_system_app,Toast.LENGTH_SHORT).show();
-                    }
-                    else
-                    {
-                        Toast.makeText(getApplicationContext(),R.string.root_system_app, Toast.LENGTH_SHORT).show();
+                if (mApps.get(position).systemApp && mFreeApps.contains(mApps.get(position).packageName)) {
+                    if (!RootManager.getInstance().obtainPermission()) {
+                        Toast.makeText(getApplicationContext(), R.string.no_root_system_app, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), R.string.root_system_app, Toast.LENGTH_SHORT).show();
                     }
                 }
 
-
-                apps.get(position).color = (
-                        apps.get(position).color == R.color.backgroundSelected
+                mApps.get(position).color = (
+                        mApps.get(position).color == R.color.backgroundSelected
                 ) ? R.color.backgroundPrimary : R.color.backgroundSelected;
-                adapter.notifyItemChanged(position);
+                mAdapter.notifyItemChanged(position);
 
-                if (free_apps.contains(apps.get(position).package_name)) {
-                    free_apps.remove(apps.get(position).package_name);
+                if (mFreeApps.contains(mApps.get(position).packageName)) {
+                    mFreeApps.remove(mApps.get(position).packageName);
                 } else {
-                    free_apps.add(apps.get(position).package_name);
+                    mFreeApps.add(mApps.get(position).packageName);
                 }
 
-                if (free_apps.size() == 0) {
-                    back.setVisibility(View.GONE);
-                    delete.setVisibility(View.GONE);
-                    free_size_tv.setVisibility(View.INVISIBLE);
-                    sort.setVisibility(View.VISIBLE);
+                if (mFreeApps.size() == 0) {
+                    mImgBtnBack.setVisibility(View.GONE);
+                    mImgBtnDelete.setVisibility(View.GONE);
+                    mTvFreeSize.setVisibility(View.INVISIBLE);
+                    mFabSort.setVisibility(View.VISIBLE);
+                    mFabFilter.setVisibility(View.VISIBLE);
                 } else {
-                    delete.setVisibility(View.VISIBLE);
-                    back.setVisibility(View.VISIBLE);
-                    free_size_tv.setVisibility(View.VISIBLE);
-                    sort.setVisibility(View.INVISIBLE);
+                    mImgBtnDelete.setVisibility(View.VISIBLE);
+                    mImgBtnBack.setVisibility(View.VISIBLE);
+                    mTvFreeSize.setVisibility(View.VISIBLE);
+                    mFabSort.setVisibility(View.INVISIBLE);
+                    mFabFilter.setVisibility(View.INVISIBLE);
                     long total_bytes = 0;
-                    for (String pkg : free_apps) {
+                    for (String pkg : mFreeApps) {
                         total_bytes += PackageUtils.getApkSize(getApplicationContext(), pkg);
                     }
-                    free_size_tv.setText(android.text.format.Formatter
+                    mTvFreeSize.setText(Formatter
                             .formatShortFileSize(
                                     getApplicationContext(),
                                     total_bytes
@@ -208,21 +212,22 @@ public class MainActivity extends AppCompatActivity {
             }
         }));
 
-        back.setOnClickListener(new View.OnClickListener() {
+        mImgBtnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                free_apps.clear();
-                back.setVisibility(View.GONE);
-                free_size_tv.setVisibility(View.INVISIBLE);
-                sort.setVisibility(View.VISIBLE);
-                delete.setVisibility(View.GONE);
-                for (int i = 0; i < apps.size(); i++)
-                    apps.get(i).color = R.color.backgroundPrimary;
-                adapter.notifyDataSetChanged();
+                mFreeApps.clear();
+                mImgBtnBack.setVisibility(View.GONE);
+                mTvFreeSize.setVisibility(View.INVISIBLE);
+                mFabSort.setVisibility(View.VISIBLE);
+                mFabFilter.setVisibility(View.VISIBLE);
+                mImgBtnDelete.setVisibility(View.GONE);
+                for (int i = 0; i < mApps.size(); i++)
+                    mApps.get(i).color = R.color.backgroundPrimary;
+                mAdapter.notifyDataSetChanged();
             }
         });
 
-        delete.setOnClickListener(new View.OnClickListener() {
+        mImgBtnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new MaterialDialog.Builder(MainActivity.this)
@@ -234,38 +239,39 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 // delete apps
                                 int count = 0;
-                                for (int i = 0; i < free_apps.size(); i++) {
+                                for (int i = 0; i < mFreeApps.size(); i++) {
                                     int index = -1;
-                                    for (int j = 0; j < apps.size(); j++) {
-                                        if (apps.get(j).package_name.compareTo(free_apps.get(i)) == 0) {
+                                    for (int j = 0; j < mApps.size(); j++) {
+                                        if (mApps.get(j).packageName.compareTo(mFreeApps.get(i)) == 0) {
                                             index = j;
                                             break;
                                         }
                                     }
 
                                     if (RootManager.getInstance().obtainPermission()) {
-                                        Result res = RootManager.getInstance().runCommand("pm uninstall " + free_apps.get(i));
+                                        Result res = RootManager.getInstance().runCommand("pm uninstall " + mFreeApps.get(i));
                                         if (res.getMessage().toLowerCase().contains("success")) {
-                                            Toast.makeText(getApplicationContext(),"Uninstalled "+apps.get(index).app_name,Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(getApplicationContext(), "Uninstalled " + mApps.get(index).appName, Toast.LENGTH_SHORT).show();
                                         } else {
-                                            Toast.makeText(getApplicationContext(), "Failed to uninstall " + apps.get(index).app_name, Toast.LENGTH_SHORT).show();
-
+                                            Toast.makeText(getApplicationContext(), "Failed to uninstall " + mApps.get(index).appName, Toast.LENGTH_SHORT).show();
                                         }
                                     } else {
-                                        Uri packageUri = Uri.parse("package:" + free_apps.get(i));
+                                        Uri packageUri = Uri.parse("package:" + mFreeApps.get(i));
                                         Intent uninstallIntent =
                                                 new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri);
                                         startActivity(uninstallIntent);
                                     }
                                     if (index != -1)
-                                        apps.remove(index);
-                                    adapter.notifyDataSetChanged();
+                                        mApps.remove(index);
+                                    mAdapter.notifyDataSetChanged();
                                 }
-                                free_apps.clear();
-                                delete.setVisibility(View.GONE);
-                                back.setVisibility(View.GONE);
-                                delete.setVisibility(View.INVISIBLE);
-                                free_size_tv.setVisibility(View.INVISIBLE);
+                                mFreeApps.clear();
+                                mImgBtnDelete.setVisibility(View.GONE);
+                                mImgBtnBack.setVisibility(View.GONE);
+                                mImgBtnDelete.setVisibility(View.INVISIBLE);
+                                mTvFreeSize.setVisibility(View.INVISIBLE);
+                                mFabSort.setVisibility(View.VISIBLE);
+                                mFabFilter.setVisibility(View.VISIBLE);
 
                             }
                         })
@@ -274,14 +280,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 refreshList();
             }
         });
 
-        sort.setOnClickListener(new View.OnClickListener() {
+        mFabSort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new MaterialDialog.Builder(MainActivity.this)
@@ -292,40 +298,58 @@ public class MainActivity extends AppCompatActivity {
                             public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
                                 switch (which) {
                                     case 0:
-                                        Collections.sort(apps, new Comparator<AppInfo>() {
+                                        Collections.sort(mApps, new Comparator<AppInfo>() {
                                             @Override
                                             public int compare(AppInfo o1, AppInfo o2) {
-                                                return o1.app_name.compareToIgnoreCase(o2.app_name);
+                                                return o1.appName.compareToIgnoreCase(o2.appName);
                                             }
                                         });
-                                        adapter.notifyDataSetChanged();
+                                        mAdapter.notifyDataSetChanged();
                                         break;
                                     case 1:
-                                        Collections.sort(apps, new Comparator<AppInfo>() {
+                                        Collections.sort(mApps, new Comparator<AppInfo>() {
                                             @Override
                                             public int compare(AppInfo o1, AppInfo o2) {
-                                                return o2.app_name.compareToIgnoreCase(o1.app_name);
+                                                return o2.appName.compareToIgnoreCase(o1.appName);
                                             }
                                         });
-                                        adapter.notifyDataSetChanged();
+                                        mAdapter.notifyDataSetChanged();
                                         break;
                                     case 2:
-                                        Collections.sort(apps, new Comparator<AppInfo>() {
+                                        Collections.sort(mApps, new Comparator<AppInfo>() {
                                             @Override
                                             public int compare(AppInfo o1, AppInfo o2) {
-                                                return (o1.file_size > o2.file_size ? 1 : -1);
+                                                return (o1.fileSize > o2.fileSize ? 1 : -1);
                                             }
                                         });
-                                        adapter.notifyDataSetChanged();
+                                        mAdapter.notifyDataSetChanged();
                                         break;
                                     case 3:
-                                        Collections.sort(apps, new Comparator<AppInfo>() {
+                                        Collections.sort(mApps, new Comparator<AppInfo>() {
                                             @Override
                                             public int compare(AppInfo o1, AppInfo o2) {
-                                                return (o1.file_size < o2.file_size ? 1 : -1);
+                                                return (o1.fileSize < o2.fileSize ? 1 : -1);
                                             }
                                         });
-                                        adapter.notifyDataSetChanged();
+                                        mAdapter.notifyDataSetChanged();
+                                        break;
+                                    case 4:
+                                        Collections.sort(mApps, new Comparator<AppInfo>() {
+                                            @Override
+                                            public int compare(AppInfo o1, AppInfo o2) {
+                                                return (o1.firstInstallTime > o2.firstInstallTime ? 1 : -1);
+                                            }
+                                        });
+                                        mAdapter.notifyDataSetChanged();
+                                        break;
+                                    case 5:
+                                        Collections.sort(mApps, new Comparator<AppInfo>() {
+                                            @Override
+                                            public int compare(AppInfo o1, AppInfo o2) {
+                                                return (o1.firstInstallTime < o2.firstInstallTime ? 1 : -1);
+                                            }
+                                        });
+                                        mAdapter.notifyDataSetChanged();
                                         break;
                                     default:
                                         break;
@@ -339,14 +363,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        mRvAppList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (dy > 0) {
-                    sort.hide();
+                    mFabSort.hide();
+                    mFabFilter.hide();
                 } else if (dy < 0) {
-                    if (free_apps.size() == 0)
-                        sort.show();
+                    if (mFreeApps.size() == 0)
+                    {
+                        mFabSort.show();
+                        mFabFilter.show();
+                    }
                 }
             }
         });
@@ -388,22 +416,23 @@ public class MainActivity extends AppCompatActivity {
         Thread thread = new Thread() {
             @Override
             public void run() {
-                apps.clear();
-                pkgs = PackageUtils.getPackageNames(getApplicationContext());
-                for (String pkg : pkgs) {
-                    apps.add(new AppInfo(pkg, getApplicationContext()));
+                mApps.clear();
+                mPkgs = PackageUtils.getPackageNames(getApplicationContext());
+                for (String pkg : mPkgs) {
+                    mApps.add(new AppInfo(pkg, getApplicationContext()));
                 }
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        adapter.notifyDataSetChanged();
-                        back.setVisibility(View.GONE);
-                        delete.setVisibility(View.GONE);
-                        free_size_tv.setVisibility(View.INVISIBLE);
-                        sort.setVisibility(View.VISIBLE);
-                        free_apps.clear();
-                        swipeRefreshLayout.setRefreshing(false);
+                        mAdapter.notifyDataSetChanged();
+                        mImgBtnBack.setVisibility(View.GONE);
+                        mImgBtnDelete.setVisibility(View.GONE);
+                        mTvFreeSize.setVisibility(View.INVISIBLE);
+                        mFabSort.setVisibility(View.VISIBLE);
+                        mFabFilter.setVisibility(View.VISIBLE);
+                        mFreeApps.clear();
+                        mSwipeLayout.setRefreshing(false);
                     }
                 });
             }
@@ -440,7 +469,7 @@ public class MainActivity extends AppCompatActivity {
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW,Uri.parse("https://github.com/sarbajitsaha/Batch-Uninstaller"));
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/sarbajitsaha/Batch-Uninstaller"));
                         startActivity(intent);
                     }
                 })
@@ -458,7 +487,7 @@ public class MainActivity extends AppCompatActivity {
                         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                         ClipData clip = ClipData.newPlainText("Bitcoin Address", "3GRYNKRUFsefuvKuTycgbMjB4DFxUXVys4");
                         clipboard.setPrimaryClip(clip);
-                        Toast.makeText(getApplicationContext(),R.string.copy_successful,Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), R.string.copy_successful, Toast.LENGTH_SHORT).show();
                     }
                 })
                 .show();

@@ -61,6 +61,9 @@ import github.nisrulz.recyclerviewhelper.RVHItemDividerDecoration;
 import github.nisrulz.recyclerviewhelper.RVHItemTouchHelperCallback;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private RecyclerView recyclerView;
     private AppInfoAdapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -84,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         free_size_tv = (TextView) findViewById(R.id.free_size);
-        back = (ImageButton) findViewById(R.id.back);
+        back = (ImageButton) findViewById(R.id.imgbtn_back);
         delete = (ImageButton) findViewById(R.id.delete);
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);

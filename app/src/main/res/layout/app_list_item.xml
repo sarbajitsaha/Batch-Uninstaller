@@ -1,51 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-    android:id="@+id/layout">
+    android:id="@+id/layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <ImageView
-        android:id="@+id/icon_img"
+        android:id="@+id/img_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="15dp"
         android:layout_marginBottom="15dp"
-        android:src="@mipmap/ic_launcher_round"/>
+        android:layout_marginLeft="15dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
+        android:src="@mipmap/ic_launcher_round" />
 
     <TextView
-        android:id="@+id/app_name"
+        android:id="@+id/tv_appname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="15dp"
-        android:layout_toRightOf="@id/icon_img"
+        android:layout_toEndOf="@+id/img_icon"
+        android:layout_toRightOf="@id/img_icon"
         android:text="Test App"
-        android:textSize="18sp"
-        />
-
-    <!--<TextView
-        android:id="@+id/pkg_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/icon_img"
-        android:layout_alignEnd="@+id/app_size"
-        android:layout_alignRight="@+id/app_size"
-        android:text="com.test.app"
-        android:textSize="16sp"/>-->
+        android:textSize="18sp" />
 
     <TextView
-        android:id="@+id/app_size"
+        android:id="@+id/tv_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="12dp"
+        android:layout_alignLeft="@+id/tv_appname"
+        android:layout_alignStart="@+id/tv_appname"
+        android:layout_below="@+id/tv_appname"
+        android:text="26/09/1234"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tv_appsize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tv_appname"
+        android:layout_alignStart="@+id/tv_appname"
+        android:layout_below="@+id/tv_date"
+        android:layout_marginTop="5dp"
         android:text="45 MB"
-        android:layout_marginTop="10dp"
-        android:textSize="14sp"
-        android:layout_alignBottom="@+id/icon_img"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="12dp"/>
-
-
+        android:textSize="14sp" />
 </RelativeLayout>

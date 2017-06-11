@@ -1,61 +1,61 @@
-<android.support.v7.widget.Toolbar
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar"
-    android:layout_height="wrap_content"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorPrimary"
     android:fitsSystemWindows="true"
     android:minHeight="?attr/actionBarSize"
-    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-    android:background="?attr/colorPrimary">
+    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <ImageButton
-            android:id="@+id/back"
-            android:layout_marginRight="5dp"
+            android:id="@+id/imgbtn_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:foregroundGravity="center_vertical"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
             android:background="@color/colorPrimary"
-            android:src="@drawable/ic_arrow_back_white_24dp"/>
+            android:foregroundGravity="center_vertical"
+            android:src="@drawable/ic_arrow_back_white_24dp" />
 
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/back"
+            android:layout_toEndOf="@+id/imgbtn_back"
+            android:layout_toRightOf="@+id/imgbtn_back"
             android:text="@string/app_name"
             android:textColor="@color/textColorSecondary"
             android:textSize="18sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/free_size"
+            android:id="@+id/tv_free_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_toLeftOf="@+id/imgbtn_delete"
+            android:layout_toStartOf="@+id/imgbtn_delete"
             android:text="135 MB"
             android:textColor="@color/textColorSecondary"
-            android:textSize="16sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
-            android:layout_toLeftOf="@+id/delete"/>
+            android:textSize="18sp" />
 
         <ImageButton
-            android:id="@+id/delete"
+            android:id="@+id/imgbtn_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:foregroundGravity="center_vertical"
-            android:background="@color/colorPrimary"
-            android:layout_marginRight="5dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:src="@drawable/ic_delete_white_24dp"/>
-
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@color/colorPrimary"
+            android:foregroundGravity="center_vertical"
+            android:src="@drawable/ic_delete_white_24dp" />
     </RelativeLayout>
-
-
-
 </android.support.v7.widget.Toolbar>

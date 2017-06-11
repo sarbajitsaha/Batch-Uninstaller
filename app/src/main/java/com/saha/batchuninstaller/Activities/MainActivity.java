@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -238,47 +239,22 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 // delete apps
-                                int count = 0;
-                                for (int i = 0; i < mFreeApps.size(); i++) {
-                                    int index = -1;
-                                    for (int j = 0; j < mApps.size(); j++) {
-                                        if (mApps.get(j).packageName.compareTo(mFreeApps.get(i)) == 0) {
-                                            index = j;
-                                            break;
-                                        }
-                                    }
-
-                                    if (RootManager.getInstance().obtainPermission()) {
-                                        Result res = RootManager.getInstance().runCommand("pm uninstall " + mFreeApps.get(i));
-                                        if (res.getMessage().toLowerCase().contains("success")) {
-                                            Toast.makeText(getApplicationContext(), "Uninstalled " + mApps.get(index).appName, Toast.LENGTH_SHORT).show();
-                                        } else {
-                                            Toast.makeText(getApplicationContext(), "Failed to uninstall " + mApps.get(index).appName, Toast.LENGTH_SHORT).show();
-                                        }
-                                    } else {
-                                        Uri packageUri = Uri.parse("package:" + mFreeApps.get(i));
-                                        Intent uninstallIntent =
-                                                new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri);
-                                        startActivity(uninstallIntent);
-                                    }
-                                    if (index != -1)
-                                        mApps.remove(index);
-                                    mAdapter.notifyDataSetChanged();
+                                dialog.dismiss();
+                                if (!RootManager.getInstance().obtainPermission()) {
+                                    Uri packageUri = Uri.parse("package:" + mFreeApps.get(0));
+                                    Intent uninstallIntent =
+                                            new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri);
+                                    uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
+                                    startActivityForResult(uninstallIntent, 1);
+                                } else {
+                                    uninstallAppRoot();
                                 }
-                                mFreeApps.clear();
-                                mImgBtnDelete.setVisibility(View.GONE);
-                                mImgBtnBack.setVisibility(View.GONE);
-                                mImgBtnDelete.setVisibility(View.INVISIBLE);
-                                mTvFreeSize.setVisibility(View.INVISIBLE);
-                                mFabSort.setVisibility(View.VISIBLE);
-                                mFabFilter.setVisibility(View.VISIBLE);
 
                             }
                         })
                         .show();
             }
         });
-
 
         mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -301,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                                         mApps.clear();
                                         mPkgs = PackageUtils.getPackageNames(getApplicationContext());
                                         for (String pkg : mPkgs) {
-                                            if(PackageUtils.isSystemApp(getApplicationContext(),pkg))
+                                            if (PackageUtils.isSystemApp(getApplicationContext(), pkg))
                                                 mApps.add(new AppInfo(pkg, getApplicationContext()));
                                         }
                                         mAdapter.notifyDataSetChanged();
@@ -310,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
                                         mApps.clear();
                                         mPkgs = PackageUtils.getPackageNames(getApplicationContext());
                                         for (String pkg : mPkgs) {
-                                            if(!PackageUtils.isSystemApp(getApplicationContext(),pkg))
+                                            if (!PackageUtils.isSystemApp(getApplicationContext(), pkg))
                                                 mApps.add(new AppInfo(pkg, getApplicationContext()));
                                         }
                                         mAdapter.notifyDataSetChanged();
@@ -418,8 +394,7 @@ public class MainActivity extends AppCompatActivity {
                     mFabSort.hide();
                     mFabFilter.hide();
                 } else if (dy < 0) {
-                    if (mFreeApps.size() == 0)
-                    {
+                    if (mFreeApps.size() == 0) {
                         mFabSort.show();
                         mFabFilter.show();
                     }
@@ -427,6 +402,50 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                String packageName = mFreeApps.get(0);
+                for (int i = 0; i < mApps.size(); i++) {
+                    if (mApps.get(i).packageName.compareTo(packageName) == 0) {
+                        mApps.remove(i);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }
+            } else {
+                String packageName = mFreeApps.get(0);
+                for (int i = 0; i < mApps.size(); i++) {
+                    if (mApps.get(i).packageName.compareTo(packageName) == 0) {
+                        mApps.get(i).color = R.color.backgroundPrimary;
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }
+                Toast.makeText(getApplication().getApplicationContext(), R.string.uninstall_fail, Toast.LENGTH_SHORT).show();
+            }
+            mFreeApps.remove(0);
+            if (mFreeApps.size() != 0) {
+                Uri packageUri = Uri.parse("package:" + mFreeApps.get(0));
+                Intent uninstallIntent =
+                        new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri);
+                uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
+                startActivityForResult(uninstallIntent, 1);
+            } else {
+                mFreeApps.clear();
+                mImgBtnDelete.setVisibility(View.GONE);
+                mImgBtnBack.setVisibility(View.GONE);
+                mImgBtnDelete.setVisibility(View.INVISIBLE);
+                mTvFreeSize.setVisibility(View.INVISIBLE);
+                mFabSort.setVisibility(View.VISIBLE);
+                mFabFilter.setVisibility(View.VISIBLE);
+                mAdapter.notifyDataSetChanged();
+                Toast.makeText(getApplication().getApplicationContext(), R.string.uninstall_complete, Toast.LENGTH_SHORT).show();
+            }
+
+        }
     }
 
     @Override
@@ -543,11 +562,53 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(mFreeApps.size()==0)
+        if (mFreeApps.size() == 0)
             super.onBackPressed();
-        else
-        {
+        else {
             mImgBtnBack.callOnClick();
         }
+    }
+
+    public void uninstallAppRoot() {
+        final String packageName = mFreeApps.get(0);
+        Result res = RootManager.getInstance().runCommand("pm uninstall " + packageName);
+        if (res.getMessage().toLowerCase().contains("success")) {
+            Toast.makeText(getApplicationContext(), "Uninstalled " + packageName, Toast.LENGTH_SHORT).show();
+            for (int i = 0; i < mApps.size(); i++) {
+                if (mApps.get(i).packageName.compareTo(packageName) == 0) {
+                    mApps.remove(i);
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "Failed to uninstall " + packageName, Toast.LENGTH_SHORT).show();
+            for (int i = 0; i < mApps.size(); i++) {
+                if (mApps.get(i).packageName.compareTo(packageName) == 0) {
+                    mApps.get(i).color = R.color.backgroundPrimary;
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        }
+        mFreeApps.remove(0);
+        if (mFreeApps.size() != 0) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    uninstallAppRoot();
+                }
+            }, Toast.LENGTH_LONG);
+        } else {
+            mFreeApps.clear();
+            mImgBtnDelete.setVisibility(View.GONE);
+            mImgBtnBack.setVisibility(View.GONE);
+            mImgBtnDelete.setVisibility(View.INVISIBLE);
+            mTvFreeSize.setVisibility(View.INVISIBLE);
+            mFabSort.setVisibility(View.VISIBLE);
+            mFabFilter.setVisibility(View.VISIBLE);
+            mAdapter.notifyDataSetChanged();
+            Toast.makeText(getApplication().getApplicationContext(), R.string.uninstall_complete, Toast.LENGTH_SHORT).show();
+        }
+
+
     }
 }

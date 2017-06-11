@@ -540,4 +540,14 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .show();
     }
+
+    @Override
+    public void onBackPressed() {
+        if(mFreeApps.size()==0)
+            super.onBackPressed();
+        else
+        {
+            mImgBtnBack.callOnClick();
+        }
+    }
 }

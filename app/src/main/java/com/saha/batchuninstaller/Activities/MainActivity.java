@@ -287,6 +287,54 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mFabFilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new MaterialDialog.Builder(MainActivity.this)
+                        .title(R.string.filter)
+                        .items(R.array.filter)
+                        .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+                            @Override
+                            public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                                switch (which) {
+                                    case 0:
+                                        mApps.clear();
+                                        mPkgs = PackageUtils.getPackageNames(getApplicationContext());
+                                        for (String pkg : mPkgs) {
+                                            if(PackageUtils.isSystemApp(getApplicationContext(),pkg))
+                                                mApps.add(new AppInfo(pkg, getApplicationContext()));
+                                        }
+                                        mAdapter.notifyDataSetChanged();
+                                        break;
+                                    case 1:
+                                        mApps.clear();
+                                        mPkgs = PackageUtils.getPackageNames(getApplicationContext());
+                                        for (String pkg : mPkgs) {
+                                            if(!PackageUtils.isSystemApp(getApplicationContext(),pkg))
+                                                mApps.add(new AppInfo(pkg, getApplicationContext()));
+                                        }
+                                        mAdapter.notifyDataSetChanged();
+                                        break;
+                                    case 2:
+                                        mApps.clear();
+                                        mPkgs = PackageUtils.getPackageNames(getApplicationContext());
+                                        for (String pkg : mPkgs) {
+                                            mApps.add(new AppInfo(pkg, getApplicationContext()));
+                                        }
+                                        mAdapter.notifyDataSetChanged();
+                                        break;
+                                    default:
+                                        break;
+
+                                }
+                                return true;
+                            }
+                        })
+                        .positiveText("Done")
+                        .show();
+            }
+        });
+
         mFabSort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

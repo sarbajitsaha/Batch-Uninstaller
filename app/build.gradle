@@ -33,5 +33,6 @@ dependencies {
     compile 'com.github.nisrulz:recyclerviewhelper:25.3.1'
     compile 'com.afollestad.material-dialogs:core:0.9.4.5'
     compile 'com.chrisplus.rootmanager:library:2.0.5@aar'
+    compile 'com.github.marcoscgdev:EasyLicensesDialog:2.0.0'
     testCompile 'junit:junit:4.12'
 }

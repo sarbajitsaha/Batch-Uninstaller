@@ -26,6 +26,7 @@
     <string name="root_system_app">Uninstalling system app can completely crash the device. Deselect if you are not sure.</string>
     <string name="filter">Filter</string>
     <string name="uninstall_fail">Uninstallation failed or cancelled</string>
+    <string name="licenses">Licenses</string>
 
     <string-array name="sort">
         <item>By Name (ASC)</item>

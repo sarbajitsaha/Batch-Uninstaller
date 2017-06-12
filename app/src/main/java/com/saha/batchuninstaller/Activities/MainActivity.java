@@ -48,6 +48,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.chrisplus.rootmanager.RootManager;
 import com.chrisplus.rootmanager.container.Result;
+import com.marcoscg.easylicensesdialog.EasyLicensesDialogCompat;
 import com.saha.batchuninstaller.Adapters.AppInfoAdapter;
 import com.saha.batchuninstaller.AppInfo;
 import com.saha.batchuninstaller.Helpers.PackageUtils;
@@ -533,11 +534,21 @@ public class MainActivity extends AppCompatActivity {
                 .title(R.string.about)
                 .content(R.string.about_text)
                 .positiveText(R.string.github)
+                .negativeText(R.string.licenses)
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/sarbajitsaha/Batch-Uninstaller"));
                         startActivity(intent);
+                    }
+                })
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        new EasyLicensesDialogCompat(MainActivity.this)
+                                .setTitle(R.string.licenses)
+                                .setPositiveButton(android.R.string.ok, null)
+                                .show();
                     }
                 })
                 .show();

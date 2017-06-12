@@ -6,7 +6,7 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/delete" />
+            android:src="@drawable/rubbish" />
     </item>
 
 </layer-list>

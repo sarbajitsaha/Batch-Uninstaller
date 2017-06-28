@@ -54,12 +54,17 @@ public class PackageUtils {
     public static boolean isSystemApp(Context context, String packageName) {
         try {
             PackageManager pm = context.getPackageManager();
-            PackageInfo targetPkgInfo = pm.getPackageInfo(
+            ApplicationInfo ai = pm.getApplicationInfo(packageName, 0);
+            if((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0){
+                return true;
+            } else
+                return false;
+            /*PackageInfo targetPkgInfo = pm.getPackageInfo(
                     packageName, PackageManager.GET_SIGNATURES);
             PackageInfo sys = pm.getPackageInfo(
                     "android", PackageManager.GET_SIGNATURES);
             return (targetPkgInfo != null && targetPkgInfo.signatures != null && sys.signatures[0]
-                    .equals(targetPkgInfo.signatures[0]));
+                    .equals(targetPkgInfo.signatures[0]));*/
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }

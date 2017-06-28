@@ -36,6 +36,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -150,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
         //populate lists with installed apps and details
         mPkgs = PackageUtils.getPackageNames(getApplicationContext());
+        Log.d(TAG,"All-> " + mPkgs.size());
         for (String pkg : mPkgs) {
             mApps.add(new AppInfo(pkg, getApplicationContext()));
         }
@@ -277,19 +279,27 @@ public class MainActivity extends AppCompatActivity {
                                     case 0:
                                         mApps.clear();
                                         mPkgs = PackageUtils.getPackageNames(getApplicationContext());
+                                        int count = 0;
                                         for (String pkg : mPkgs) {
-                                            if (PackageUtils.isSystemApp(getApplicationContext(), pkg))
+                                            if (PackageUtils.isSystemApp(getApplicationContext(), pkg)){
                                                 mApps.add(new AppInfo(pkg, getApplicationContext()));
+                                                count++;
+                                            }
                                         }
+                                        Log.d(TAG,"System-> " + count);
                                         mAdapter.notifyDataSetChanged();
                                         break;
                                     case 1:
                                         mApps.clear();
                                         mPkgs = PackageUtils.getPackageNames(getApplicationContext());
+                                        count = 0;
                                         for (String pkg : mPkgs) {
-                                            if (!PackageUtils.isSystemApp(getApplicationContext(), pkg))
+                                            if (!PackageUtils.isSystemApp(getApplicationContext(), pkg)){
                                                 mApps.add(new AppInfo(pkg, getApplicationContext()));
+                                                count++;
+                                            }
                                         }
+                                        Log.d(TAG,"User-> " + count);
                                         mAdapter.notifyDataSetChanged();
                                         break;
                                     case 2:
@@ -510,7 +520,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void feedback() {
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                "mailto", "batchuninstaller@protonmail.com", null));
+                "mailto", "sarbajitsaha1@gmail.com", null));
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.feedback));
         startActivity(Intent.createChooser(emailIntent, getResources().getString(R.string.send_email)));
     }

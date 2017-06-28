@@ -9,7 +9,7 @@ An Android app that allows uninstallation of multiple app at once (only if root 
 	<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"/>
 </a>-->
 
-![1](screenshots/1.png)
+<img src="screenshots/1.png" width="300">
 
 ## Description
 
@@ -29,6 +29,7 @@ However, you will be prompted for each app uninstalled. Non Root users can not u
 ## Todo
 
 * Backup system apps before uninstalling for rooted phones.
+* 
 
 ## Feature Requests
 
@@ -44,11 +45,11 @@ Bitcoin donations are welcome and accepted at the following address:
 
 ## Screenshots
 
-![1](screenshots/1.png)
-![2](screenshots/2.png)
-![3](screenshots/3.png)
-![4](screenshots/4.png)
-![5](screenshots/5.png)
+<!--<img src="screenshots/1.png" width="200" hspace="20" align="left">-->
+<img src="screenshots/2.png" width="200" hspace="20" align="left">
+<img src="screenshots/3.png" width="200" hspace="20" align="left">
+<img src="screenshots/4.png" width="200" hspace="20" align="left">
+<img src="screenshots/5.png" width="200" hspace="20">
 
 ## License
 

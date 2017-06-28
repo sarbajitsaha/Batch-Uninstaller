@@ -27,6 +27,7 @@
     <string name="filter">Filter</string>
     <string name="uninstall_fail">Uninstallation failed or cancelled</string>
     <string name="licenses">Licenses</string>
+    <string name="uninstall_cancel">Uninstallation cancelled</string>
 
     <string-array name="sort">
         <item>By Name (ASC)</item>

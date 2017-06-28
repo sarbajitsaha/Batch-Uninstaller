@@ -17,15 +17,19 @@
 
 package com.saha.batchuninstaller.Activities;
 
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -59,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import github.nisrulz.recyclerviewhelper.RVHItemClickListener;
 import github.nisrulz.recyclerviewhelper.RVHItemDividerDecoration;
@@ -79,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton mFabSort, mFabFilter;
     private SharedPreferences mPrefs;
     private SharedPreferences.Editor mEditor;
+    private ProgressDialog progressDialog; //deprecated, need to replace this later
+    private boolean appUninstallCancelled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         mEditor = mPrefs.edit();
         mApps = new ArrayList<>();
         mFreeApps = new ArrayList<>();
+        appUninstallCancelled = false;
 
         //toolbar icons visibility
         mTvFreeSize.setVisibility(View.INVISIBLE);
@@ -151,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
 
         //populate lists with installed apps and details
         mPkgs = PackageUtils.getPackageNames(getApplicationContext());
-        Log.d(TAG,"All-> " + mPkgs.size());
+        Log.d(TAG, "All-> " + mPkgs.size());
         for (String pkg : mPkgs) {
             mApps.add(new AppInfo(pkg, getApplicationContext()));
         }
@@ -250,6 +258,21 @@ public class MainActivity extends AppCompatActivity {
                                     uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
                                     startActivityForResult(uninstallIntent, 1);
                                 } else {
+                                    appUninstallCancelled = false;
+                                    progressDialog = new ProgressDialog(MainActivity.this);
+                                    progressDialog.setMax(mFreeApps.size());
+                                    progressDialog.setTitle("Uninstalling...");
+                                    progressDialog.setCancelable(false);
+                                    progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            Log.i(TAG,"Uninstall cancelled");
+                                            mFreeApps.clear();
+                                            appUninstallCancelled = true;
+                                        }
+                                    });
+                                    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                                    progressDialog.show();
                                     uninstallAppRoot();
                                 }
 
@@ -633,45 +656,116 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void uninstallAppRoot() {
-        final String packageName = mFreeApps.get(0);
-        Result res = RootManager.getInstance().runCommand("pm uninstall " + packageName);
-        if (res.getMessage().toLowerCase().contains("success")) {
-            Toast.makeText(getApplicationContext(), "Uninstalled " + packageName, Toast.LENGTH_SHORT).show();
-            for (int i = 0; i < mApps.size(); i++) {
-                if (mApps.get(i).packageName.compareTo(packageName) == 0) {
-                    mApps.remove(i);
-                    mAdapter.notifyDataSetChanged();
+        if (!appUninstallCancelled) {
+            final String packageName = mFreeApps.get(0);
+            progressDialog.setTitle("Uninstalling " + packageName);
+
+            runAsyncTask(new AsyncTask<Void, Void, Result>() {
+
+                @Override
+                protected Result doInBackground(Void... voids) {
+                    return RootManager.getInstance().uninstallPackage(packageName);
                 }
+
+                @Override
+                protected void onPreExecute() {
+                    super.onPreExecute();
+                }
+
+                @Override
+                protected void onPostExecute(Result result) {
+                    Log.i(TAG, "root_uninstall-> " + packageName+" "+result.getMessage());
+                    if (result.getMessage().toLowerCase().contains("success")) {
+                        progressDialog.setMessage("Uninstalled " + packageName);
+                        progressDialog.incrementProgressBy(1);
+                        // Toast.makeText(getApplicationContext(),, Toast.LENGTH_SHORT).show();
+                        for (int i = 0; i < mApps.size(); i++) {
+                            if (mApps.get(i).packageName.compareTo(packageName) == 0) {
+                                mApps.remove(i);
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        }
+                    } else {
+                        progressDialog.incrementProgressBy(1);
+                        Toast.makeText(getApplicationContext(), "Failed to uninstall " + packageName + " Reason: "+ result.getMessage(), Toast.LENGTH_SHORT).show();
+                        for (int i = 0; i < mApps.size(); i++) {
+                            if (mApps.get(i).packageName.compareTo(packageName) == 0) {
+                                mApps.get(i).color = R.color.backgroundPrimary;
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        }
+                    }
+                    super.onPostExecute(result);
+                }
+            });
+
+            mFreeApps.remove(0);
+            if (mFreeApps.size() != 0) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        uninstallAppRoot();
+                    }
+                }, Toast.LENGTH_LONG);
+            } else {
+                if(progressDialog.isShowing())
+                    progressDialog.dismiss();
+                mFreeApps.clear();
+                for(int i=0;i<mApps.size();i++){
+                    mApps.get(i).color = R.color.backgroundPrimary;
+                }
+                mImgBtnDelete.setVisibility(View.GONE);
+                mImgBtnBack.setVisibility(View.GONE);
+                mImgBtnDelete.setVisibility(View.INVISIBLE);
+                mTvFreeSize.setVisibility(View.INVISIBLE);
+                mFabSort.setVisibility(View.VISIBLE);
+                mFabFilter.setVisibility(View.VISIBLE);
+                mAdapter.notifyDataSetChanged();
+                Toast.makeText(getApplication().getApplicationContext(), R.string.uninstall_complete, Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(getApplicationContext(), "Failed to uninstall " + packageName, Toast.LENGTH_SHORT).show();
-            for (int i = 0; i < mApps.size(); i++) {
-                if (mApps.get(i).packageName.compareTo(packageName) == 0) {
-                    mApps.get(i).color = R.color.backgroundPrimary;
-                    mAdapter.notifyDataSetChanged();
-                }
-            }
-        }
-        mFreeApps.remove(0);
-        if (mFreeApps.size() != 0) {
-            new Handler().postDelayed(new Runnable() {
+            mSwipeLayout.setRefreshing(true);
+            Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    uninstallAppRoot();
+                    mFreeApps.clear();
+                    for(int i=0;i<mApps.size();i++){
+                        mApps.get(i).color = R.color.backgroundPrimary;
+                    }
+                    appUninstallCancelled = false;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(progressDialog.isShowing())
+                                progressDialog.dismiss();
+                            mImgBtnDelete.setVisibility(View.GONE);
+                            mImgBtnBack.setVisibility(View.GONE);
+                            mImgBtnDelete.setVisibility(View.INVISIBLE);
+                            mTvFreeSize.setVisibility(View.INVISIBLE);
+                            mFabSort.setVisibility(View.VISIBLE);
+                            mFabFilter.setVisibility(View.VISIBLE);
+                            mAdapter.notifyDataSetChanged();
+                            mSwipeLayout.setRefreshing(false);
+                        }
+                    });
+
                 }
-            }, Toast.LENGTH_LONG);
-        } else {
-            mFreeApps.clear();
-            mImgBtnDelete.setVisibility(View.GONE);
-            mImgBtnBack.setVisibility(View.GONE);
-            mImgBtnDelete.setVisibility(View.INVISIBLE);
-            mTvFreeSize.setVisibility(View.INVISIBLE);
-            mFabSort.setVisibility(View.VISIBLE);
-            mFabFilter.setVisibility(View.VISIBLE);
-            mAdapter.notifyDataSetChanged();
-            Toast.makeText(getApplication().getApplicationContext(), R.string.uninstall_complete, Toast.LENGTH_SHORT).show();
+            });
+            thread.start();
         }
 
 
     }
+
+    private static final <T> void runAsyncTask(AsyncTask<T, ?, ?> asyncTask, T... params) {
+        try {
+            asyncTask.execute(params).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
 }
+
+

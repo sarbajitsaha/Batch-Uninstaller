@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 mEditor.putBoolean("ask_again", dialog.isPromptCheckBoxChecked());
-                                mEditor.commit();
+                                mEditor.apply();
                                 if (RootManager.getInstance().obtainPermission()) {
                                     Toast.makeText(getApplicationContext(), R.string.granted, Toast.LENGTH_SHORT).show();
                                 } else {
@@ -277,38 +277,80 @@ public class MainActivity extends AppCompatActivity {
                             public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
                                 switch (which) {
                                     case 0:
-                                        mApps.clear();
-                                        mPkgs = PackageUtils.getPackageNames(getApplicationContext());
-                                        int count = 0;
-                                        for (String pkg : mPkgs) {
-                                            if (PackageUtils.isSystemApp(getApplicationContext(), pkg)){
-                                                mApps.add(new AppInfo(pkg, getApplicationContext()));
-                                                count++;
+                                        Thread t_system = new Thread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                mApps.clear();
+                                                mPkgs = PackageUtils.getPackageNames(getApplicationContext());
+                                                int count = 0;
+                                                for (String pkg : mPkgs) {
+                                                    if (PackageUtils.isSystemApp(getApplicationContext(), pkg)) {
+                                                        mApps.add(new AppInfo(pkg, getApplicationContext()));
+                                                        count++;
+                                                    }
+                                                }
+                                                Log.d(TAG, "System-> " + count);
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        mAdapter.notifyDataSetChanged();
+                                                        mSwipeLayout.setRefreshing(false);
+                                                    }
+                                                });
                                             }
-                                        }
-                                        Log.d(TAG,"System-> " + count);
-                                        mAdapter.notifyDataSetChanged();
+                                        });
+                                        mSwipeLayout.setRefreshing(true);
+                                        t_system.start();
                                         break;
                                     case 1:
-                                        mApps.clear();
-                                        mPkgs = PackageUtils.getPackageNames(getApplicationContext());
-                                        count = 0;
-                                        for (String pkg : mPkgs) {
-                                            if (!PackageUtils.isSystemApp(getApplicationContext(), pkg)){
-                                                mApps.add(new AppInfo(pkg, getApplicationContext()));
-                                                count++;
+                                        Thread t_user = new Thread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                mApps.clear();
+                                                mPkgs = PackageUtils.getPackageNames(getApplicationContext());
+                                                int count = 0;
+                                                for (String pkg : mPkgs) {
+                                                    if (!PackageUtils.isSystemApp(getApplicationContext(), pkg)) {
+                                                        mApps.add(new AppInfo(pkg, getApplicationContext()));
+                                                        count++;
+                                                    }
+                                                }
+                                                Log.d(TAG, "User-> " + count);
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        mAdapter.notifyDataSetChanged();
+                                                        mSwipeLayout.setRefreshing(false);
+                                                    }
+                                                });
                                             }
-                                        }
-                                        Log.d(TAG,"User-> " + count);
-                                        mAdapter.notifyDataSetChanged();
+                                        });
+                                        mSwipeLayout.setRefreshing(true);
+                                        t_user.start();
                                         break;
                                     case 2:
-                                        mApps.clear();
-                                        mPkgs = PackageUtils.getPackageNames(getApplicationContext());
-                                        for (String pkg : mPkgs) {
-                                            mApps.add(new AppInfo(pkg, getApplicationContext()));
-                                        }
-                                        mAdapter.notifyDataSetChanged();
+                                        Thread t_all = new Thread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                mApps.clear();
+                                                mPkgs = PackageUtils.getPackageNames(getApplicationContext());
+                                                int count = 0;
+                                                for (String pkg : mPkgs) {
+                                                    mApps.add(new AppInfo(pkg, getApplicationContext()));
+                                                    count++;
+                                                }
+                                                Log.d(TAG, "All-> " + count);
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        mAdapter.notifyDataSetChanged();
+                                                        mSwipeLayout.setRefreshing(false);
+                                                    }
+                                                });
+                                            }
+                                        });
+                                        mSwipeLayout.setRefreshing(true);
+                                        t_all.start();
                                         break;
                                     default:
                                         break;

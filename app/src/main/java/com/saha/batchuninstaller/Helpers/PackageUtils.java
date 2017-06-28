@@ -19,7 +19,6 @@ package com.saha.batchuninstaller.Helpers;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -55,16 +54,7 @@ public class PackageUtils {
         try {
             PackageManager pm = context.getPackageManager();
             ApplicationInfo ai = pm.getApplicationInfo(packageName, 0);
-            if((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0){
-                return true;
-            } else
-                return false;
-            /*PackageInfo targetPkgInfo = pm.getPackageInfo(
-                    packageName, PackageManager.GET_SIGNATURES);
-            PackageInfo sys = pm.getPackageInfo(
-                    "android", PackageManager.GET_SIGNATURES);
-            return (targetPkgInfo != null && targetPkgInfo.signatures != null && sys.signatures[0]
-                    .equals(targetPkgInfo.signatures[0]));*/
+            return (ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
@@ -106,7 +96,7 @@ public class PackageUtils {
 
     public static List<String> getPackageNames(Context context) {
         List<ApplicationInfo> pkgs = context.getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
-        List<String> pkg_names = new ArrayList<String>();
+        List<String> pkg_names = new ArrayList<>();
         for (ApplicationInfo pkg : pkgs) {
             pkg_names.add(pkg.packageName);
         }

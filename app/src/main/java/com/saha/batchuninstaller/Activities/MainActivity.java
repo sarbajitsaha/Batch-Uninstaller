@@ -544,7 +544,7 @@ public class MainActivity extends AppCompatActivity {
                 rate();
                 return true;
             case R.id.donate:
-                donate();
+                donate_package();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -629,8 +629,20 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void donate() {
-        new MaterialDialog.Builder(MainActivity.this)
+    private void donate_package() {
+      /*  String donate_package = "com.saha.batchuninstaller.donate";
+        Uri uri = Uri.parse("market://details?id=" + donate_package);
+        Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+        goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        try {
+            startActivity(goToMarket);
+        } catch (ActivityNotFoundException e) {
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://play.google.com/store/apps/details?id=" + donate_package)));
+        }*/
+       new MaterialDialog.Builder(MainActivity.this)
                 .title(R.string.donate)
                 .content(R.string.donate_content)
                 .positiveText(R.string.copy)

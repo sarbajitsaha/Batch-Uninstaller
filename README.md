@@ -2,12 +2,9 @@
 An Android app that allows uninstallation of multiple app at once (only if root permission is available, otherwise need to confirm each time).
 
 <a href="https://play.google.com/store/apps/details?id=com.saha.batchuninstaller" target="_blank">
-	<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80"/>
-</a>
-<!--
-<a href="https://f-droid.org/repository/browse/?fdid=com.saha.batchuninstaller" target="_blank">
-	<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"/>
-</a>-->
+<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80"/></a>
+<a href="https://f-droid.org/packages/com.saha.batchuninstaller/" target="_blank">
+<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"/></a>
 
 <img src="screenshots/1.png" width="300">
 
@@ -23,20 +20,18 @@ However, you will be prompted for each app uninstalled. Non Root users can not u
 * Uninstall multiple apps at once
 * Sort by date, name and size
 * Filter by user and system apps
-* Know how much space you are freeing up during the selection process.
+* Know how much space you are freeing up during the selection process
 * Displays application name, install date and size
 
 ## Todo
 
-* Backup system apps before uninstalling for rooted phones.
-* 
+* Backup system apps before uninstalling for rooted phones
 
 ## Feature Requests
 
 All planned enhancements are here: https://github.com/sarbajitsaha/Batch-Uninstaller/labels/enhancement
 
 If you can't see a similar request, [request yours](https://github.com/sarbajitsaha/Batch-Uninstaller/issues/new) today!
-
 
 ## Donations
 

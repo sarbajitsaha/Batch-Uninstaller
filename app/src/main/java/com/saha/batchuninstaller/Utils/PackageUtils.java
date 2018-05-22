@@ -15,7 +15,7 @@
  * along with Batch Uninstaller.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package com.saha.batchuninstaller.Helpers;
+package com.saha.batchuninstaller.Utils;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -59,7 +59,6 @@ public class PackageUtils {
             return false;
         }
     }
-
     public static long getInstalledDate(Context context, String packageName) {
         try {
             return context.getPackageManager().getPackageInfo(packageName, PackageManager.GET_META_DATA).firstInstallTime;

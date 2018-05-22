@@ -18,9 +18,11 @@
 package com.saha.batchuninstaller;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 
-import com.saha.batchuninstaller.Helpers.PackageUtils;
+import com.saha.batchuninstaller.Utils.PackageUtils;
 
 public class AppInfo {
     public int color;
@@ -29,6 +31,7 @@ public class AppInfo {
     public long fileSize;
     public String appName;
     public boolean systemApp;
+    public ApplicationInfo info;
     public long firstInstallTime;
 
     public AppInfo(String packageName, Context context) {
@@ -38,6 +41,11 @@ public class AppInfo {
         appName = PackageUtils.getAppName(context, packageName);
         systemApp = PackageUtils.isSystemApp(context, packageName);
         firstInstallTime = PackageUtils.getInstalledDate(context, packageName);
+        try{
+            info = context.getPackageManager().getApplicationInfo(packageName,0);
+        } catch (PackageManager.NameNotFoundException e){
+            info = null;
+        }
         color = R.color.backgroundPrimary;
     }
 }

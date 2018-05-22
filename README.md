@@ -1,8 +1,6 @@
 # Batch Uninstaller
 An Android app that allows uninstallation of multiple app at once (only if root permission is available, otherwise need to confirm each time).
 
-<a href="https://play.google.com/store/apps/details?id=com.saha.batchuninstaller" target="_blank">
-<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80"/></a>
 <a href="https://f-droid.org/packages/com.saha.batchuninstaller/" target="_blank">
 <img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"/></a>
 

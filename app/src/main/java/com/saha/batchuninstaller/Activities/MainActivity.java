@@ -25,11 +25,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -51,13 +51,13 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.chrisplus.rootmanager.RootManager;
-import com.chrisplus.rootmanager.container.Result;
 import com.marcoscg.easylicensesdialog.EasyLicensesDialogCompat;
 import com.saha.batchuninstaller.Adapters.AppInfoAdapter;
 import com.saha.batchuninstaller.AppInfo;
-import com.saha.batchuninstaller.Helpers.PackageUtils;
 import com.saha.batchuninstaller.R;
+import com.saha.batchuninstaller.Utils.PackageUtils;
+import com.saha.batchuninstaller.Utils.RootUtils;
+import com.stericson.RootTools.RootTools;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,13 +79,14 @@ public class MainActivity extends AppCompatActivity {
     private List<AppInfo> mApps;
     private List<String> mPkgs;
     private TextView mTvFreeSize;
-    private List<String> mFreeApps;
+    private List<ApplicationInfo> mFreeApps;
     private ImageButton mImgBtnBack, mImgBtnDelete;
     private FloatingActionButton mFabSort, mFabFilter;
     private SharedPreferences mPrefs;
     private SharedPreferences.Editor mEditor;
     private ProgressDialog progressDialog; //deprecated, need to replace this later
     private boolean appUninstallCancelled;
+    private boolean systemAppUninstalled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,40 +121,24 @@ public class MainActivity extends AppCompatActivity {
 
         //show dialog for root and non-root phones. If root ask for permission
         if (!mPrefs.getBoolean("ask_again", false)) {
-            if (checkForRoot()) {
-                new MaterialDialog.Builder(MainActivity.this)
-                        .title(R.string.important)
-                        .content(R.string.root_check_content)
-                        .neutralText(R.string.understood)
-                        .onAny(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                mEditor.putBoolean("ask_again", dialog.isPromptCheckBoxChecked());
-                                mEditor.apply();
-                                if (RootManager.getInstance().obtainPermission()) {
-                                    Toast.makeText(getApplicationContext(), R.string.granted, Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(getApplicationContext(), R.string.denied, Toast.LENGTH_SHORT).show();
-                                }
+            new MaterialDialog.Builder(MainActivity.this)
+                    .title(R.string.important)
+                    .content(R.string.root_grant_ask)
+                    .neutralText(R.string.understood)
+                    .onAny(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            mEditor.putBoolean("ask_again", dialog.isPromptCheckBoxChecked());
+                            mEditor.apply();
+                            if (RootTools.isAccessGiven()) {
+                                Toast.makeText(getApplicationContext(), R.string.granted, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(), R.string.denied, Toast.LENGTH_SHORT).show();
                             }
-                        })
-                        .checkBoxPromptRes(R.string.dont_show_again, false, null)
-                        .show();
-            } else {
-                new MaterialDialog.Builder(MainActivity.this)
-                        .title(R.string.important)
-                        .content(R.string.non_root_content)
-                        .neutralText(R.string.understood)
-                        .checkBoxPromptRes(R.string.dont_show_again, false, null)
-                        .onAny(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                mEditor.putBoolean("ask_again", dialog.isPromptCheckBoxChecked());
-                                mEditor.commit();
-                            }
-                        })
-                        .show();
-            }
+                        }
+                    })
+                    .checkBoxPromptRes(R.string.dont_show_again, false, null)
+                    .show();
         }
 
 
@@ -180,8 +165,8 @@ public class MainActivity extends AppCompatActivity {
                 this, new RVHItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (mApps.get(position).systemApp && mFreeApps.contains(mApps.get(position).packageName)) {
-                    if (!RootManager.getInstance().obtainPermission()) {
+                if (mApps.get(position).systemApp && mFreeApps.contains(mApps.get(position).info)) {
+                    if (!RootTools.isAccessGiven()) {
                         Toast.makeText(getApplicationContext(), R.string.no_root_system_app, Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getApplicationContext(), R.string.root_system_app, Toast.LENGTH_SHORT).show();
@@ -193,10 +178,10 @@ public class MainActivity extends AppCompatActivity {
                 ) ? R.color.backgroundPrimary : R.color.backgroundSelected;
                 mAdapter.notifyItemChanged(position);
 
-                if (mFreeApps.contains(mApps.get(position).packageName)) {
-                    mFreeApps.remove(mApps.get(position).packageName);
+                if (mFreeApps.contains(mApps.get(position).info)) {
+                    mFreeApps.remove(mApps.get(position).info);
                 } else {
-                    mFreeApps.add(mApps.get(position).packageName);
+                    mFreeApps.add(mApps.get(position).info);
                 }
 
                 if (mFreeApps.size() == 0) {
@@ -212,8 +197,8 @@ public class MainActivity extends AppCompatActivity {
                     mFabSort.setVisibility(View.INVISIBLE);
                     mFabFilter.setVisibility(View.INVISIBLE);
                     long total_bytes = 0;
-                    for (String pkg : mFreeApps) {
-                        total_bytes += PackageUtils.getApkSize(getApplicationContext(), pkg);
+                    for (ApplicationInfo pkg : mFreeApps) {
+                        total_bytes += PackageUtils.getApkSize(getApplicationContext(), pkg.packageName);
                     }
                     mTvFreeSize.setText(Formatter
                             .formatShortFileSize(
@@ -228,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mFreeApps.clear();
+                systemAppUninstalled = false;
                 mImgBtnBack.setVisibility(View.GONE);
                 mTvFreeSize.setVisibility(View.INVISIBLE);
                 mFabSort.setVisibility(View.VISIBLE);
@@ -251,8 +237,8 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 // delete apps
                                 dialog.dismiss();
-                                if (!RootManager.getInstance().obtainPermission()) {
-                                    Uri packageUri = Uri.parse("package:" + mFreeApps.get(0));
+                                if (!RootTools.isAccessGiven()) {
+                                    Uri packageUri = Uri.parse("package:" + mFreeApps.get(0).packageName);
                                     Intent uninstallIntent =
                                             new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri);
                                     uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
@@ -437,7 +423,7 @@ public class MainActivity extends AppCompatActivity {
                                         Collections.sort(mApps, new Comparator<AppInfo>() {
                                             @Override
                                             public int compare(AppInfo o1, AppInfo o2) {
-                                                return (o1.firstInstallTime > o2.firstInstallTime ? 1 : -1);
+                                                return (o1.firstInstallTime < o2.firstInstallTime ? -1 : 1);
                                             }
                                         });
                                         mAdapter.notifyDataSetChanged();
@@ -485,7 +471,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
-                String packageName = mFreeApps.get(0);
+                String packageName = mFreeApps.get(0).packageName;
                 for (int i = 0; i < mApps.size(); i++) {
                     if (mApps.get(i).packageName.compareTo(packageName) == 0) {
                         mApps.remove(i);
@@ -493,7 +479,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             } else {
-                String packageName = mFreeApps.get(0);
+                String packageName = mFreeApps.get(0).packageName;
                 for (int i = 0; i < mApps.size(); i++) {
                     if (mApps.get(i).packageName.compareTo(packageName) == 0) {
                         mApps.get(i).color = R.color.backgroundPrimary;
@@ -504,7 +490,7 @@ public class MainActivity extends AppCompatActivity {
             }
             mFreeApps.remove(0);
             if (mFreeApps.size() != 0) {
-                Uri packageUri = Uri.parse("package:" + mFreeApps.get(0));
+                Uri packageUri = Uri.parse("package:" + mFreeApps.get(0).packageName);
                 Intent uninstallIntent =
                         new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri);
                 uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
@@ -551,10 +537,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public boolean checkForRoot() {
-        return RootManager.getInstance().hasRooted();
-    }
-
     public void refreshList() {
         Thread thread = new Thread() {
             @Override
@@ -575,6 +557,7 @@ public class MainActivity extends AppCompatActivity {
                         mFabSort.setVisibility(View.VISIBLE);
                         mFabFilter.setVisibility(View.VISIBLE);
                         mFreeApps.clear();
+                        systemAppUninstalled = false;
                         mSwipeLayout.setRefreshing(false);
                     }
                 });
@@ -586,7 +569,7 @@ public class MainActivity extends AppCompatActivity {
     private void feedback() {
         Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
                 "mailto", "sarbajitsaha1@gmail.com", null));
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.feedback));
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.email_subject));
         startActivity(Intent.createChooser(emailIntent, getResources().getString(R.string.send_email)));
     }
 
@@ -667,16 +650,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /*possibly a very bad solution. need to rewrite this later*/
     public void uninstallAppRoot() {
         if (!appUninstallCancelled) {
-            final String packageName = mFreeApps.get(0);
-            progressDialog.setTitle("Uninstalling " + packageName);
+            final ApplicationInfo pkg = mFreeApps.get(0);
+            if(pkg.sourceDir.startsWith("/system"))
+                systemAppUninstalled = true;
+            progressDialog.setTitle("Uninstalling " + pkg.packageName);
 
-            runAsyncTask(new AsyncTask<Void, Void, Result>() {
-
+            runAsyncTask(new AsyncTask<Void, Void, Boolean>() {
                 @Override
-                protected Result doInBackground(Void... voids) {
-                    return RootManager.getInstance().uninstallPackage(packageName);
+                protected Boolean doInBackground(Void... voids) {
+                    return RootUtils.uninstallApp(pkg);
                 }
 
                 @Override
@@ -685,23 +670,22 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override
-                protected void onPostExecute(Result result) {
-                    Log.i(TAG, "root_uninstall-> " + packageName+" "+result.getMessage());
-                    if (result.getMessage().toLowerCase().contains("success")) {
-                        progressDialog.setMessage("Uninstalled " + packageName);
+                protected void onPostExecute(Boolean result) {
+                    if (result) {
+                        progressDialog.setMessage("Uninstalled " + pkg.packageName);
                         progressDialog.incrementProgressBy(1);
                         // Toast.makeText(getApplicationContext(),, Toast.LENGTH_SHORT).show();
                         for (int i = 0; i < mApps.size(); i++) {
-                            if (mApps.get(i).packageName.compareTo(packageName) == 0) {
+                            if (mApps.get(i).packageName.compareTo(pkg.packageName) == 0) {
                                 mApps.remove(i);
                                 mAdapter.notifyDataSetChanged();
                             }
                         }
                     } else {
                         progressDialog.incrementProgressBy(1);
-                        Toast.makeText(getApplicationContext(), "Failed to uninstall " + packageName + " Reason: "+ result.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Failed to uninstall " + pkg.packageName, Toast.LENGTH_SHORT).show();
                         for (int i = 0; i < mApps.size(); i++) {
-                            if (mApps.get(i).packageName.compareTo(packageName) == 0) {
+                            if (mApps.get(i).packageName.compareTo(pkg.packageName) == 0) {
                                 mApps.get(i).color = R.color.backgroundPrimary;
                                 mAdapter.notifyDataSetChanged();
                             }
@@ -733,7 +717,25 @@ public class MainActivity extends AppCompatActivity {
                 mFabSort.setVisibility(View.VISIBLE);
                 mFabFilter.setVisibility(View.VISIBLE);
                 mAdapter.notifyDataSetChanged();
+                if(systemAppUninstalled)
+                {
+                    new MaterialDialog.Builder(MainActivity.this)
+                            .title(R.string.important)
+                            .content(R.string.system_app_reboot)
+                            .positiveText(R.string.reboot_now)
+                            .negativeText(R.string.reboot_later)
+                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    if(RootTools.isAccessGiven())
+                                        RootTools.restartAndroid();
+                                }
+                            })
+                            .show();
+
+                }
                 Toast.makeText(getApplication().getApplicationContext(), R.string.uninstall_complete, Toast.LENGTH_SHORT).show();
+                systemAppUninstalled = false;
             }
         } else {
             mSwipeLayout.setRefreshing(true);
@@ -758,6 +760,7 @@ public class MainActivity extends AppCompatActivity {
                             mFabFilter.setVisibility(View.VISIBLE);
                             mAdapter.notifyDataSetChanged();
                             mSwipeLayout.setRefreshing(false);
+                            systemAppUninstalled  = false;
                         }
                     });
 
@@ -769,7 +772,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private static final <T> void runAsyncTask(AsyncTask<T, ?, ?> asyncTask, T... params) {
+    private <T> void runAsyncTask(AsyncTask<T, ?, ?> asyncTask, T... params) {
         try {
             asyncTask.execute(params).get();
         } catch (InterruptedException e) {
@@ -778,6 +781,9 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 }
+
+
 
 

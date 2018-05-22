@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
     defaultConfig {
         applicationId "com.saha.batchuninstaller"
         minSdkVersion 16
-        targetSdkVersion 26
-        versionCode 4
-        versionName "0.93"
+        targetSdkVersion 27
+        versionCode 5
+        versionName "0.94"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -21,18 +21,36 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    implementation ('com.android.support:appcompat-v7:27.1.1'){
+        exclude module: 'support-v4'
+    }
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.github.nisrulz:recyclerviewhelper:27.1.0'
+    implementation 'com.afollestad.material-dialogs:core:0.9.4.5'
+    implementation 'com.github.marcoscgdev:EasyLicensesDialog:2.0.0'
+    androidTestImplementation 'junit:junit:4.12'
+    implementation project(':RootTools')
+    implementation project(':RootShell')
+}
 
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == 'com.android.support') {
+            if (!requested.name.startsWith("multidex")) {
+                details.useVersion '27.1.1'
+            }
+        }
+    }
+}
 
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support:recyclerview-v7:25.3.1'
-    compile 'com.github.nisrulz:recyclerviewhelper:25.3.1'
-    compile 'com.afollestad.material-dialogs:core:0.9.4.5'
-    compile 'com.chrisplus.rootmanager:library:2.0.5@aar'
-    compile 'com.github.marcoscgdev:EasyLicensesDialog:2.0.0'
-    testCompile 'junit:junit:4.12'
+android {
+    defaultConfig {
+        multiDexEnabled true
+    }
 }

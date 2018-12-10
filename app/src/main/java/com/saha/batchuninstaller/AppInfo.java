@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a donate_copy of the GNU General Public License
  * along with Batch Uninstaller.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
@@ -41,9 +41,9 @@ public class AppInfo {
         appName = PackageUtils.getAppName(context, packageName);
         systemApp = PackageUtils.isSystemApp(context, packageName);
         firstInstallTime = PackageUtils.getInstalledDate(context, packageName);
-        try{
-            info = context.getPackageManager().getApplicationInfo(packageName,0);
-        } catch (PackageManager.NameNotFoundException e){
+        try {
+            info = context.getPackageManager().getApplicationInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
             info = null;
         }
         color = R.color.backgroundPrimary;

@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a donate_copy of the GNU General Public License
  * along with Batch Uninstaller.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
@@ -59,6 +59,7 @@ public class PackageUtils {
             return false;
         }
     }
+
     public static long getInstalledDate(Context context, String packageName) {
         try {
             return context.getPackageManager().getPackageInfo(packageName, PackageManager.GET_META_DATA).firstInstallTime;

@@ -9,10 +9,10 @@
         android:id="@+id/img_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginBottom="15dp"
-        android:layout_marginLeft="15dp"
         android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
         android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         android:src="@mipmap/ic_launcher_round" />
 
     <TextView
@@ -29,9 +29,9 @@
         android:id="@+id/tv_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tv_appname"
-        android:layout_alignStart="@+id/tv_appname"
         android:layout_below="@+id/tv_appname"
+        android:layout_alignStart="@+id/tv_appname"
+        android:layout_alignLeft="@+id/tv_appname"
         android:text="26/09/1234"
         android:textSize="16sp" />
 
@@ -39,9 +39,9 @@
         android:id="@+id/tv_appsize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tv_appname"
-        android:layout_alignStart="@+id/tv_appname"
         android:layout_below="@+id/tv_date"
+        android:layout_alignStart="@+id/tv_appname"
+        android:layout_alignLeft="@+id/tv_appname"
         android:layout_marginTop="5dp"
         android:text="45 MB"
         android:textSize="14sp" />

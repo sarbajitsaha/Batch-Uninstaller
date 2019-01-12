@@ -1,39 +1,81 @@
 <resources>
+    <!-- App Name -->
     <string name="app_name">Batch Uninstaller</string>
+
+    <!-- General -->
     <string name="dont_show_again">Don\'t show again</string>
-    <string name="root_check_content">Congratulations! Your phone is rooted. We will ask for the root permission next. If you choose to deny it, the app will still work, but there will be a prompt before each app is uninstalled.\nUnfortunately, this is a limitation of the Android system</string>
-    <string name="about">About</string>
-    <string name="feedback">Feedback</string>
-    <string name="email_subject">Batch Uninstaller Feedback</string>
-    <string name="rate">Rate Us</string>
-    <string name="donate">Donate</string>
-    <string name="send_email">Send email...</string>
     <string name="understood">Understood</string>
-    <string name="granted">Granted permission</string>
+    <string name="granted">Permission granted</string>
     <string name="denied">Permission denied</string>
-    <string name="non_root_content">Your phone is not rooted. The app will still work, but there will be a prompt before each app is uninstalled. Unfortunately, this is a limitation of the Android system However, this process will still be faster than uninstalling them from the settings menu</string>
-    <string name="uninstall_confirmation">Are you sure you want to uninstall these app(s)?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="uninstall_complete">Uninstallation complete</string>
+    <string name="reboot_now">Reboot now</string>
+    <string name="reboot_later">Reboot later</string>
     <string name="sort">Sort</string>
-    <string name="about_text">Simple batch uninstaller app to uninstall multiple apps at once. Works best if rooted\n\nThis app is open source. Check out the source code from the link below</string>
-    <string name="copy">Copy Address</string>
-    <string name="donate_content">If you find this app useful, you can donate via Bitcoin. Donation doesn\'t provide any additional benefits.Press the button below to copy the bitcoin address to your clipboard</string>
-    <string name="copy_successful">Bitcoin Address copied to clipboard</string>
-    <string name="github">Github Link</string>
-    <string name="important">Important</string>
-    <string name="no_root_system_app">System apps can only be restored to original installed version, cannot be uninstalled completely without root permission</string>
-    <string name="root_system_app">Uninstalling system app can completely crash the device. Deselect if you are not sure.</string>
     <string name="filter">Filter</string>
-    <string name="uninstall_fail">Uninstallation failed or cancelled</string>
-    <string name="licenses">Licenses</string>
-    <string name="uninstall_cancel">Uninstallation cancelled</string>
-    <string name="root_grant_ask">We will ask for root permission now. If your phone is not rooted, or you don\'t want to use root, you can deny it.</string>
-    <string name="system_app_reboot">You have uninstalled one or more system apps. To remove them from the launcher and app drawer, you need to reboot the phone.</string>
-    <string name="reboot_now">Reboot Now</string>
-    <string name="reboot_later">Reboot Later</string>
 
+    <!-- Uninstall -->
+    <string name="uninstall_confirmation">Are you sure you want to uninstall these app(s)?</string>
+    <string name="uninstall_complete">Uninstallation complete</string>
+    <string name="uninstall_fail">Uninstallation failed or cancelled</string>
+    <string name="uninstall_cancel">Uninstallation cancelled</string>
+
+    <!-- Root Explanations -->
+    <string name="root_check_content">
+        Your phone is rooted. Awesome!
+        We will ask for the root permission next.
+        If you choose to deny it, the app will still work, but there will be a prompt before each app is uninstalled.
+        \nUnfortunately, this is a limitation of the Android system.
+    </string>
+    <string name="no_root_check_content">
+        Your phone is not rooted.
+        The app will still work, but there will be a prompt before each app is uninstalled.
+        Unfortunately, this is a limitation of the Android system.
+        However, this process will still be faster than uninstalling them from the settings menu.
+    </string>
+    <string name="root_system_app">
+        Uninstalling certain system apps can brick the device/render it unusable in some cases.
+        Select ONLY if you are absolutely sure.
+    </string>
+    <string name="no_root_system_app">
+        System apps can only be restored to the original installed version.
+        They cannot be uninstalled completely without root permissions.
+    </string>
+    <string name="root_grant_ask">
+        We will ask for root permissions now.
+        If your phone is not rooted, or you don\'t want to use root, you can deny it.
+    </string>
+    <string name="system_app_reboot">
+        You have uninstalled one or more system apps.
+        To remove them from the launcher and app drawer, you need to reboot the phone.
+    </string>
+
+    <!-- About -->
+    <string name="about">About</string>
+    <string name="about_text">
+        A simple batch uninstaller app to uninstall multiple apps at once.
+        Works best if phone is rooted.
+        \n\nThis app is open-source and can be found on GitHub!
+    </string>
+    <string name="github">GitHub Link</string>
+    <string name="important">Important</string>
+    <string name="licenses">Licenses</string>
+    <string name="feedback">Feedback</string>
+    <string name="send_email">Send Email</string>
+    <string name="email_subject">Batch Uninstaller Feedback</string>
+    <string name="rate">Rate Us</string>
+
+    <!-- Donate -->
+    <string name="donate">Donate</string>
+    <string name="donate_copy">Copy address</string>
+    <string name="donate_copy_successful">Bitcoin address copied to clipboard.</string>
+    <string name="donate_content">
+        If you find this app useful, you can donate via Bitcoin.
+        Donating doesn\'t provide any additional benefits.
+        Press the button below to copy the Bitcoin address to your clipboard.
+    </string>
+
+    <!-- Arrays -->
     <string-array name="sort">
         <item>By Name (ASC)</item>
         <item>By Name (DESC)</item>

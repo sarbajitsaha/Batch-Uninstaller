@@ -21,7 +21,7 @@
             android:layout_marginRight="5dp"
             android:background="@color/colorPrimary"
             android:foregroundGravity="center_vertical"
-            android:src="@drawable/ic_arrow_back_white_24dp" />
+            app:srcCompat="@drawable/ic_arrow_back_white_24dp" />
 
         <TextView
             android:id="@+id/tv_title"
@@ -40,8 +40,8 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
-            android:layout_toLeftOf="@+id/imgbtn_delete"
             android:layout_toStartOf="@+id/imgbtn_delete"
+            android:layout_toLeftOf="@+id/imgbtn_delete"
             android:text="135 MB"
             android:textColor="@color/textColorSecondary"
             android:textSize="18sp" />
@@ -56,6 +56,6 @@
             android:layout_marginRight="5dp"
             android:background="@color/colorPrimary"
             android:foregroundGravity="center_vertical"
-            android:src="@drawable/ic_delete_white_24dp" />
+            app:srcCompat="@drawable/ic_delete_white_24dp" />
     </RelativeLayout>
 </android.support.v7.widget.Toolbar>

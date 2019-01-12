@@ -41,9 +41,9 @@ public class AppInfo {
         appName = PackageUtils.getAppName(context, packageName);
         systemApp = PackageUtils.isSystemApp(context, packageName);
         firstInstallTime = PackageUtils.getInstalledDate(context, packageName);
-        try{
-            info = context.getPackageManager().getApplicationInfo(packageName,0);
-        } catch (PackageManager.NameNotFoundException e){
+        try {
+            info = context.getPackageManager().getApplicationInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
             info = null;
         }
         color = R.color.backgroundPrimary;

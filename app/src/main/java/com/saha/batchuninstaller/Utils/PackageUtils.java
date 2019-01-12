@@ -59,6 +59,7 @@ public class PackageUtils {
             return false;
         }
     }
+
     public static long getInstalledDate(Context context, String packageName) {
         try {
             return context.getPackageManager().getPackageInfo(packageName, PackageManager.GET_META_DATA).firstInstallTime;

@@ -48,7 +48,8 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.ItemView
 
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.app_list_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.app_list_item, parent, false);
         return new ItemViewHolder(view);
     }
 
@@ -59,7 +60,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.ItemView
         holder.mTvAppName.setText(mAppsList.get(position).appName);
         holder.mTvAppSize.setText(Formatter.formatShortFileSize(mContext, mAppsList.get(position).fileSize));
 
-        Date date=new Date(mAppsList.get(position).firstInstallTime);
+        Date date = new Date(mAppsList.get(position).firstInstallTime);
         SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yy");
         holder.mTvAppDate.setText(df2.format(date));
     }
@@ -76,13 +77,15 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.ItemView
 
     @Override
     public void onItemDismiss(int position, int direction) {
-        /*String pkg_name = mAppsList.get(position).packageName;
+/*
+        String pkg_name = mAppsList.get(position).packageName;
         mAppsList.remove(position);
         notifyItemRemoved(position);
         Uri packageUri = Uri.parse("package:" + pkg_name);
         Intent uninstallIntent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri);
         uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(uninstallIntent);*/
+        mContext.startActivity(uninstallIntent);
+*/
         notifyDataSetChanged();
     }
 
@@ -93,11 +96,11 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.ItemView
 
         public ItemViewHolder(View itemView) {
             super(itemView);
-            mTvAppName = (TextView) itemView.findViewById(R.id.tv_appname);
-            mTvAppSize = (TextView) itemView.findViewById(R.id.tv_appsize);
-            mTvAppDate = (TextView) itemView.findViewById(R.id.tv_date);
-            mImgIcon = (ImageView) itemView.findViewById(R.id.img_icon);
-            mLayoutItem = (RelativeLayout) itemView.findViewById(R.id.layout_appitem);
+            mTvAppName = itemView.findViewById(R.id.tv_appname);
+            mTvAppSize = itemView.findViewById(R.id.tv_appsize);
+            mTvAppDate = itemView.findViewById(R.id.tv_date);
+            mImgIcon = itemView.findViewById(R.id.img_icon);
+            mLayoutItem = itemView.findViewById(R.id.layout_appitem);
         }
 
         @Override

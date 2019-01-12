@@ -31,10 +31,6 @@ All planned enhancements are here: https://github.com/sarbajitsaha/Batch-Uninsta
 
 If you can't see a similar request, [request yours](https://github.com/sarbajitsaha/Batch-Uninstaller/issues/new) today!
 
-## Donations
-
-Bitcoin donations are welcome and accepted at the following address:
-`3GRYNKRUFsefuvKuTycgbMjB4DFxUXVys4`
 
 ## Screenshots
 

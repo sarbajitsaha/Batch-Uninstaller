@@ -524,18 +524,6 @@ public class MainActivity extends AppCompatActivity {
                     Uri.parse("https://play.google.com/store/apps/details?id=" + donate_package)));
         }
 */
-        new MaterialDialog.Builder(MainActivity.this)
-                .title(R.string.donate)
-                .content(R.string.donate_content)
-                .positiveText(R.string.donate_copy)
-                .onPositive((dialog, which) -> {
-                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText(
-                            "Bitcoin Address", "3GRYNKRUFsefuvKuTycgbMjB4DFxUXVys4");
-                    clipboard.setPrimaryClip(clip);
-                    Toast.makeText(getApplicationContext(), R.string.donate_copy_successful, Toast.LENGTH_SHORT).show();
-                })
-                .show();
     }
 
     @Override

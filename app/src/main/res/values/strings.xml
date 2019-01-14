@@ -67,13 +67,6 @@
 
     <!-- Donate -->
     <string name="donate">Donate</string>
-    <string name="donate_copy">Copy address</string>
-    <string name="donate_copy_successful">Bitcoin address copied to clipboard.</string>
-    <string name="donate_content">
-        If you find this app useful, you can donate via Bitcoin.
-        Donating doesn\'t provide any additional benefits.
-        Press the button below to copy the Bitcoin address to your clipboard.
-    </string>
 
     <!-- Arrays -->
     <string-array name="sort">

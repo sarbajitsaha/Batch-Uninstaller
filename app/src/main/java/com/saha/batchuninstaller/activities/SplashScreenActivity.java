@@ -15,7 +15,7 @@
  * along with Batch Uninstaller.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package com.saha.batchuninstaller.Activities;
+package com.saha.batchuninstaller.activities;
 
 import android.content.Intent;
 import android.os.Bundle;

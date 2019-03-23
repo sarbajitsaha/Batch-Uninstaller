@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*****************************************************************************
  * This file is part of Batch Uninstaller.
  *
  * Batch Uninstaller is free software: you can redistribute it and/or modify
@@ -15,14 +15,11 @@
  * along with Batch Uninstaller.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package com.saha.batchuninstaller.Activities;
+package com.saha.batchuninstaller.activities;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;

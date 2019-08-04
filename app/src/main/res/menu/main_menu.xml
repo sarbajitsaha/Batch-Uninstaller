@@ -4,11 +4,14 @@
         android:id="@+id/about"
         android:title="@string/about" />
     <item
+        android:id="@+id/nightmode"
+        android:title="@string/night_mode" />
+    <item
         android:id="@+id/rate"
         android:title="@string/rate" />
-    <item
+    <!--<item
         android:id="@+id/donate"
-        android:title="@string/donate" />
+        android:title="@string/donate" />-->
     <item
         android:id="@+id/feedback"
         android:title="@string/feedback" />

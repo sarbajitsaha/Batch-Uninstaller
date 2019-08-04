@@ -32,6 +32,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -105,6 +106,15 @@ public class MainActivity extends AppCompatActivity {
         mApps = new ArrayList<>();
         mFreeApps = new ArrayList<>();
         appUninstallCancelled = false;
+
+        //day night mode
+        if(mPrefs.getInt("night_mode", 0) == 0) //auto
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
+        else if(mPrefs.getInt("night_mode", 0) == 1) //day
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        else
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
 
         //toolbar icons visibility
         mTvFreeSize.setVisibility(View.INVISIBLE);
@@ -427,18 +437,43 @@ public class MainActivity extends AppCompatActivity {
             case R.id.about:
                 about();
                 return true;
+            case R.id.nightmode:
+                select_nightmode();
+                return true;
             case R.id.feedback:
                 feedback();
                 return true;
             case R.id.rate:
                 rate();
                 return true;
-            case R.id.donate:
+           /* case R.id.donate:
                 donate_package();
-                return true;
+                return true;*/
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    void select_nightmode()
+    {
+        new MaterialDialog.Builder(MainActivity.this)
+                .title(R.string.night_mode)
+                .items(R.array.night_mode_options)
+                .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
+                    switch (which) {
+                        case 0:
+                        case 1:
+                        case 2:
+                            mEditor.putInt("night_mode",which);
+                            mEditor.commit();
+                            startActivity(getIntent());
+                            finish();
+                            break;
+                        default:
+                            break;
+                    }
+                    return true;
+                }).show();
     }
 
     public void refreshList() {
@@ -506,8 +541,8 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void donate_package() {
-/*
+/*    private void donate_package() {
+
         String donate_package = "com.saha.batchuninstaller.donate";
         Uri uri = Uri.parse("market://details?id=" + donate_package);
         Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
@@ -520,8 +555,8 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(Intent.ACTION_VIEW,
                     Uri.parse("https://play.google.com/store/apps/details?id=" + donate_package)));
         }
-*/
-    }
+
+    }*/
 
     @Override
     public void onBackPressed() {

@@ -12,23 +12,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Batch Uninstaller.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
+ * along with Batch Uninstaller.  If not, see <http:></http:>//www.gnu.org/licenses/>.
+ */
+package com.saha.batchuninstaller.activities
 
-package com.saha.batchuninstaller.activities;
+import android.content.Intent
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 
-import android.content.Intent;
-import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-
-public class SplashScreenActivity extends AppCompatActivity {
-
-    private static final String TAG = SplashScreenActivity.class.getSimpleName();
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        startActivity(new Intent(SplashScreenActivity.this, MainActivity.class));
-        finish();
-    }
+class SplashScreenActivity : AppCompatActivity() {
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		startActivity(Intent(this@SplashScreenActivity, MainActivity::class.java))
+		finish()
+	}
 }

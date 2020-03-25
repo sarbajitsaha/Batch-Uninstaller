@@ -42,7 +42,7 @@
             android:layout_marginRight="5dp"
             android:layout_toStartOf="@+id/imgbtn_delete"
             android:layout_toLeftOf="@+id/imgbtn_delete"
-            android:text="135 MB"
+            android:text="@string/_135_mb"
             android:textColor="@color/textColorSecondary"
             android:textSize="18sp" />
 

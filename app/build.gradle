@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 28
@@ -12,7 +14,7 @@ android {
         versionName "0.97"
 
         multiDexEnabled true
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -37,23 +39,25 @@ dependencies {
     implementation project(':RootTools')
     implementation project(':RootShell')
 
-    implementation('com.android.support:appcompat-v7:28.0.0', {
+    implementation('androidx.appcompat:appcompat:1.0.0', {
         exclude module: 'support-v4'
     })
-    implementation 'com.android.support:design:28.0.0'
+    implementation 'com.google.android.material:material:1.1.0'
     //implementation 'com.android.support:support-v4:28.0.0'
-    implementation 'com.android.support:recyclerview-v7:28.0.0'
-    implementation 'com.android.support:support-compat:28.0.0'
-    implementation 'com.android.support:support-core-utils:28.0.0'
-    implementation 'com.android.support:support-media-compat:28.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.core:core:1.2.0'
+    implementation 'androidx.legacy:legacy-support-core-utils:1.0.0'
+    implementation 'androidx.media:media:1.1.0'
 
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
     implementation 'com.github.nisrulz:recyclerviewhelper:27.1.1'
     implementation 'com.github.marcoscgdev:EasyLicensesDialog:2.0.0'
     //implementation 'com.github.marcoscgdev:Licenser:1.0.5'
 
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    testImplementation 'junit:junit:4.13'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
 }
 
 configurations.all {
@@ -65,4 +69,7 @@ configurations.all {
             }
         }
     }
+}
+repositories {
+    mavenCentral()
 }

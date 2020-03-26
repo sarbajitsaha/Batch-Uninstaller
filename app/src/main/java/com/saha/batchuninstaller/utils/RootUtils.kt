@@ -23,36 +23,32 @@ import java.io.IOException
 /**
  * Created by sarbajit on 22/5/18.
  */
-class RootUtils {
+object RootUtils {
+	fun uninstallApp(pkg: ApplicationInfo?): Boolean {
+		return if (pkg!!.sourceDir.startsWith("/system")) uninstallSystemApp(pkg) else uninstallUserApp(pkg)
+	}
 
-	companion object {
+	private fun uninstallSystemApp(pkg: ApplicationInfo?): Boolean {
+		val sourceDir = pkg!!.sourceDir
+		val dataDir = pkg.dataDir
+		RootTools.debugMode = true
+		return (RootTools.deleteFileOrDirectory(sourceDir, true)
+				&& RootTools.deleteFileOrDirectory(dataDir, true))
+	}
 
-		fun uninstallApp(pkg: ApplicationInfo?): Boolean {
-			return if (pkg!!.sourceDir.startsWith("/system")) uninstallSystemApp(pkg) else uninstallUserApp(pkg)
+	private fun uninstallUserApp(pkg: ApplicationInfo?): Boolean {
+		var status = false
+		try {
+			val commandDelete = arrayOf("su", "-c", """pm uninstall ${pkg!!.packageName}""")
+			val process = Runtime.getRuntime().exec(commandDelete)
+			process.waitFor()
+			val i = process.exitValue()
+			if (i == 0) status = true
+		} catch (e: InterruptedException) {
+			e.printStackTrace()
+		} catch (e: IOException) {
+			e.printStackTrace()
 		}
-
-		private fun uninstallSystemApp(pkg: ApplicationInfo?): Boolean {
-			val sourceDir = pkg!!.sourceDir
-			val dataDir = pkg.dataDir
-			RootTools.debugMode = true
-			return (RootTools.deleteFileOrDirectory(sourceDir, true)
-					&& RootTools.deleteFileOrDirectory(dataDir, true))
-		}
-
-		private fun uninstallUserApp(pkg: ApplicationInfo?): Boolean {
-			var status = false
-			try {
-				val commandDelete = arrayOf("su", "-c", """pm uninstall ${pkg!!.packageName}""")
-				val process = Runtime.getRuntime().exec(commandDelete)
-				process.waitFor()
-				val i = process.exitValue()
-				if (i == 0) status = true
-			} catch (e: InterruptedException) {
-				e.printStackTrace()
-			} catch (e: IOException) {
-				e.printStackTrace()
-			}
-			return status
-		}
+		return status
 	}
 }

@@ -24,9 +24,7 @@ import java.io.IOException
  * Created by sarbajit on 22/5/18.
  */
 object RootUtils {
-	fun uninstallApp(pkg: ApplicationInfo?): Boolean {
-		return if (pkg!!.sourceDir.startsWith("/system")) uninstallSystemApp(pkg) else uninstallUserApp(pkg)
-	}
+	fun uninstallApp(pkg: ApplicationInfo?) = if (pkg!!.sourceDir.startsWith("/system")) uninstallSystemApp(pkg) else uninstallUserApp(pkg)
 
 	private fun uninstallSystemApp(pkg: ApplicationInfo?): Boolean {
 		val sourceDir = pkg!!.sourceDir

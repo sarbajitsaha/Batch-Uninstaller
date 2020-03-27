@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Batch Uninstaller.  If not, see <http:></http:>//www.gnu.org/licenses/>.
  */
-package com.saha.batchuninstaller.activities
+package com.saha.batchuninstaller.ui.main
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -46,9 +46,9 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.marcoscg.easylicensesdialog.EasyLicensesDialogCompat
 import com.saha.batchuninstaller.AppInfo
 import com.saha.batchuninstaller.R
-import com.saha.batchuninstaller.adapters.AppInfoAdapter
+import com.saha.batchuninstaller.ui.main.adapters.AppInfoAdapter
 import com.saha.batchuninstaller.utils.PackageUtils
-import com.saha.batchuninstaller.utils.RootUtils
+import com.saha.batchuninstaller.utils.uninstallApp
 import com.stericson.RootTools.RootTools
 import github.nisrulz.recyclerviewhelper.RVHItemClickListener
 import github.nisrulz.recyclerviewhelper.RVHItemDividerDecoration
@@ -64,8 +64,10 @@ class MainActivity : AppCompatActivity() {
 	private var mPkgs: List<String> = arrayListOf()
 	private var mFreeApps: ArrayList<ApplicationInfo> = arrayListOf()
 
-	private val mPrefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-	private var mEditor: Editor? = mPrefs.edit()
+	private lateinit var mPrefs: SharedPreferences
+	private lateinit var mEditor: Editor
+
+
 	private var progressDialog //deprecated, need to replace this later
 			: ProgressDialog? = null
 	private var appUninstallCancelled = false
@@ -75,7 +77,8 @@ class MainActivity : AppCompatActivity() {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 		val mRvAppList = findViewById<RecyclerView>(R.id.rv_applist)
-
+		mPrefs = PreferenceManager.getDefaultSharedPreferences(this)
+		mEditor = mPrefs.edit()
 		//initialization
 		appUninstallCancelled = false
 
@@ -105,15 +108,11 @@ class MainActivity : AppCompatActivity() {
 						mEditor?.putBoolean("ask_again", dialog.isPromptCheckBoxChecked)
 						mEditor?.apply()
 						try {
-							try {
-								when {
-									RootTools.isAccessGiven() -> Toast.makeText(applicationContext, R.string.granted, Toast.LENGTH_SHORT).show()
-									else -> Toast.makeText(applicationContext, R.string.denied, Toast.LENGTH_SHORT).show()
-								}
-							} catch (e: NotFoundException) {
-								Log.e(javaClass.simpleName, "UnhandledException", e)
+							when {
+								RootTools.isAccessGiven() -> Toast.makeText(applicationContext, R.string.granted, Toast.LENGTH_SHORT).show()
+								else -> Toast.makeText(applicationContext, R.string.denied, Toast.LENGTH_SHORT).show()
 							}
-						} catch (e: NotFoundException) {
+						} catch (e: Exception) {
 							Log.e(javaClass.simpleName, "UnhandledException", e)
 						}
 					}
@@ -207,9 +206,9 @@ class MainActivity : AppCompatActivity() {
 							appUninstallCancelled = false
 							progressDialog = ProgressDialog(this@MainActivity)
 							progressDialog!!.max = mFreeApps.size
-							progressDialog!!.setTitle("Uninstalling...")
+							progressDialog!!.setTitle(R.string.uninstall_trailing)
 							progressDialog!!.setCancelable(false)
-							progressDialog!!.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel"
+							progressDialog!!.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel)
 							) { _, _ ->
 								Log.i(TAG, "Uninstall cancelled")
 								mFreeApps.clear()
@@ -292,7 +291,7 @@ class MainActivity : AppCompatActivity() {
 						}
 						true
 					}
-					.positiveText("Done")
+					.positiveText(R.string.done)
 					.show()
 		}
 		fab_sort.setOnClickListener {
@@ -547,13 +546,11 @@ class MainActivity : AppCompatActivity() {
 			if (pkg.sourceDir.startsWith("/system")) systemAppUninstalled = true
 			progressDialog!!.setTitle("Uninstalling " + pkg.packageName)
 			runAsyncTask(object : AsyncTask<Void, Void, Boolean>() {
-				override fun doInBackground(vararg voids: Void): Boolean {
-					return RootUtils.uninstallApp(pkg)
-				}
+				override fun doInBackground(vararg voids: Void): Boolean = pkg.uninstallApp()
 
 				override fun onPostExecute(result: Boolean) {
 					if (result) {
-						progressDialog!!.setMessage("Uninstalled " + pkg.packageName)
+						progressDialog!!.setMessage(getString(R.string.uninstall_past_tense) + pkg.packageName)
 						progressDialog!!.incrementProgressBy(1)
 						// Toast.makeText(getApplicationContext(),, Toast.LENGTH_SHORT).show();
 						for (i in mApps.indices) {
@@ -565,7 +562,7 @@ class MainActivity : AppCompatActivity() {
 					} else {
 						progressDialog!!.incrementProgressBy(1)
 						try {
-							Toast.makeText(applicationContext, "Failed to uninstall "
+							Toast.makeText(applicationContext, getString(R.string.uninstall_fail_toast)
 									+ pkg.packageName, Toast.LENGTH_SHORT).show()
 						} catch (e: NotFoundException) {
 							Log.e(javaClass.simpleName, "UnhandledException", e)

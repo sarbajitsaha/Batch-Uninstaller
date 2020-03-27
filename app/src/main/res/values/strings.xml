@@ -72,6 +72,11 @@
     <string name="_26_09_1234">26/09/1234</string>
     <string name="_45_mb">45 MB</string>
     <string name="_135_mb">135 MB</string>
+    <string name="uninstall_trailing">Uninstalling...</string>
+    <string name="cancel">Cancel</string>
+    <string name="uninstall_fail_toast">\"Failed to uninstall \"</string>
+    <string name="uninstall_past_tense">\"Uninstalled \"</string>
+    <string name="done">Done</string>
 
     <!-- Arrays -->
     <string-array name="sort">

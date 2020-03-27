@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Batch Uninstaller.  If not, see <http:></http:>//www.gnu.org/licenses/>.
  */
-package com.saha.batchuninstaller.adapters
+package com.saha.batchuninstaller.ui.main.adapters
 
 import android.content.Context
 import android.content.res.Resources
@@ -28,7 +28,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.saha.batchuninstaller.AppInfo
 import com.saha.batchuninstaller.R
-import com.saha.batchuninstaller.adapters.AppInfoAdapter.ItemViewHolder
+import com.saha.batchuninstaller.ui.main.adapters.AppInfoAdapter.ItemViewHolder
 import github.nisrulz.recyclerviewhelper.RVHAdapter
 import github.nisrulz.recyclerviewhelper.RVHViewHolder
 import java.text.SimpleDateFormat

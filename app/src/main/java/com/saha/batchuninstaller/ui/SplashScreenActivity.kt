@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Batch Uninstaller.  If not, see <http:></http:>//www.gnu.org/licenses/>.
  */
-package com.saha.batchuninstaller.activities
+package com.saha.batchuninstaller.ui
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.saha.batchuninstaller.ui.main.MainActivity
 
 class SplashScreenActivity : AppCompatActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {

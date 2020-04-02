@@ -105,8 +105,8 @@ class MainActivity : AppCompatActivity() {
 					.content(R.string.root_grant_ask)
 					.neutralText(R.string.understood)
 					.onAny { dialog, _ ->
-						mEditor?.putBoolean("ask_again", dialog.isPromptCheckBoxChecked)
-						mEditor?.apply()
+						mEditor.putBoolean("ask_again", dialog.isPromptCheckBoxChecked)
+						mEditor.apply()
 						try {
 							when {
 								RootTools.isAccessGiven() -> Toast.makeText(applicationContext, R.string.granted, Toast.LENGTH_SHORT).show()
@@ -125,9 +125,9 @@ class MainActivity : AppCompatActivity() {
 		mPkgs = PackageUtils.getPackageNames(applicationContext)
 		Log.d(TAG, "All-> " + mPkgs.size)
 		for (pkg in mPkgs) {
-			mApps.add(AppInfo(pkg, applicationContext))
+			mApps.add(AppInfo(pkg, this))
 		}
-		mAdapter = AppInfoAdapter(applicationContext, mApps)
+		mAdapter = AppInfoAdapter(this, mApps)
 		mRvAppList.layoutManager = LinearLayoutManager(this)
 		mRvAppList.adapter = mAdapter
 		val callback: ItemTouchHelper.Callback = RVHItemTouchHelperCallback(
@@ -434,8 +434,8 @@ class MainActivity : AppCompatActivity() {
 				.itemsCallbackSingleChoice(-1) { _, _, which, _ ->
 					when (which) {
 						0, 1, 2 -> {
-							mEditor!!.putInt("night_mode", which)
-							mEditor!!.commit()
+							mEditor.putInt("night_mode", which)
+							mEditor.commit()
 							startActivity(intent)
 							finish()
 						}

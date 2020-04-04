@@ -24,7 +24,7 @@ import java.io.IOException
  * Created by sarbajit on 22/5/18.
  */
 object RootUtils {
-	fun uninstallSystemApp(pkg: ApplicationInfo?): Boolean {
+	private fun uninstallSystemAppRoot(pkg: ApplicationInfo?): Boolean {
 		val sourceDir = pkg!!.sourceDir
 		val dataDir = pkg.dataDir
 		RootTools.debugMode = true
@@ -32,7 +32,7 @@ object RootUtils {
 				&& RootTools.deleteFileOrDirectory(dataDir, true))
 	}
 
-	fun uninstallUserApp(pkg: ApplicationInfo?): Boolean {
+	private fun uninstallUserAppRoot(pkg: ApplicationInfo?): Boolean {
 		var status = false
 		try {
 			val commandDelete = arrayOf("su", "-c", """pm uninstall ${pkg!!.packageName}""")
@@ -47,7 +47,7 @@ object RootUtils {
 		}
 		return status
 	}
-}
 
-fun ApplicationInfo.uninstallApp() = if (this.sourceDir.startsWith("/system"))
-	RootUtils.uninstallSystemApp(this) else RootUtils.uninstallUserApp(this)
+	fun ApplicationInfo.uninstallAppRoot() = if (this.sourceDir.startsWith("/system"))
+		RootUtils.uninstallSystemAppRoot(this) else RootUtils.uninstallUserAppRoot(this)
+}

@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.saha.batchuninstaller">
+    <uses-permission-sdk-23 android:name="android.permission.REQUEST_DELETE_PACKAGES"/>
 
     <application
         android:allowBackup="true"

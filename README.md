@@ -9,7 +9,7 @@ An Android app that allows uninstallation of multiple app at once (only if root 
 ## Description
 
 Batch Uninstaller allows you to uninstall multiple apps at once. If root permission is not available, you can still delete multiple apps a lot quicker than you can using the native android implementation.
- 
+
 However, you will be prompted for each app uninstalled. Non Root users can not uninstall system apps. This is a limitation with the Android Operating system.
 
 

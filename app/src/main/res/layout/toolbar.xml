@@ -1,5 +1,6 @@
 <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -21,7 +22,8 @@
             android:layout_marginRight="5dp"
             android:background="@color/colorPrimary"
             android:foregroundGravity="center_vertical"
-            app:srcCompat="@drawable/ic_arrow_back_white_24dp" />
+            app:srcCompat="@drawable/ic_arrow_back_white_24dp"
+            android:contentDescription="Back button" />
 
         <TextView
             android:id="@+id/tv_title"
@@ -44,7 +46,8 @@
             android:layout_toLeftOf="@+id/imgbtn_delete"
             android:text="@string/_135_mb"
             android:textColor="@color/textColorSecondary"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            tools:ignore="RelativeOverlap" />
 
         <ImageButton
             android:id="@+id/imgbtn_delete"

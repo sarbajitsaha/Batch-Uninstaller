@@ -43,6 +43,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.marcoscg.easylicensesdialog.EasyLicensesDialogCompat
 import com.saha.batchuninstaller.AppInfo
 import com.saha.batchuninstaller.R
+import com.saha.batchuninstaller.databinding.ActivityMainBinding
 import com.saha.batchuninstaller.ui.main.adapters.AppInfoAdapter
 import com.saha.batchuninstaller.utils.PackageUtils
 import com.saha.batchuninstaller.utils.RootUtils.uninstallAppRoot
@@ -50,8 +51,6 @@ import com.stericson.RootTools.RootTools
 import github.nisrulz.recyclerviewhelper.RVHItemClickListener
 import github.nisrulz.recyclerviewhelper.RVHItemDividerDecoration
 import github.nisrulz.recyclerviewhelper.RVHItemTouchHelperCallback
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.toolbar.*
 import java.util.*
 import java.util.concurrent.ExecutionException
 
@@ -63,16 +62,19 @@ class MainActivity : AppCompatActivity() {
 
 	private lateinit var mPrefs: SharedPreferences
 	private lateinit var mEditor: Editor
+    private lateinit var binding: ActivityMainBinding
 
-
-	private var progressDialog //deprecated, need to replace this later
+    private var progressDialog //deprecated, need to replace this later
 			: ProgressDialog? = null
 	private var appUninstallCancelled = false
 	private var systemAppUninstalled = false
 
-	override fun onCreate(savedInstanceState: Bundle?) {
+	@SuppressLint("NotifyDataSetChanged")
+    override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+		setContentView(view)
 		val mRvAppList = findViewById<RecyclerView>(R.id.rv_applist)
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this)
 		mEditor = mPrefs.edit()
@@ -90,10 +92,10 @@ class MainActivity : AppCompatActivity() {
 
 
 		//toolbar icons visibility
-		tv_free_size.visibility = View.INVISIBLE
-		imgbtn_back.visibility = View.GONE
-		imgbtn_delete.visibility = View.GONE
-		setSupportActionBar(toolbar)
+		binding.toolbar.tvFreeSize.visibility = View.INVISIBLE
+		binding.toolbar.imgbtnBack.visibility = View.GONE
+        binding.toolbar.imgbtnDelete.visibility = View.GONE
+		setSupportActionBar(binding.toolbar.toolbar)
 
 		//show dialog for root and non-root phones. If root ask for permission
 		if (!mPrefs.getBoolean("ask_again", false)) {
@@ -172,40 +174,40 @@ class MainActivity : AppCompatActivity() {
                 mFreeApps.add(mApps[position].info!!)
             }
             if (mFreeApps.size == 0) {
-                imgbtn_back.visibility = View.GONE
-                imgbtn_delete.visibility = View.GONE
-                tv_free_size.visibility = View.INVISIBLE
-                fab_sort.visibility = View.VISIBLE
-                fab_filter.visibility = View.VISIBLE
+                binding.toolbar.imgbtnBack.visibility = View.GONE
+                binding.toolbar.imgbtnDelete.visibility = View.GONE
+                binding.toolbar.tvFreeSize.visibility = View.INVISIBLE
+                binding.fabSort.visibility = View.VISIBLE
+                binding.fabFilter.visibility = View.VISIBLE
             } else {
-                imgbtn_delete.visibility = View.VISIBLE
-                imgbtn_back.visibility = View.VISIBLE
-                tv_free_size.visibility = View.VISIBLE
-                fab_sort.visibility = View.INVISIBLE
-                fab_filter.visibility = View.INVISIBLE
+                binding.toolbar.imgbtnBack.visibility = View.VISIBLE
+                binding.toolbar.imgbtnDelete.visibility = View.VISIBLE
+                binding.toolbar.tvFreeSize.visibility = View.VISIBLE
+                binding.fabSort.visibility = View.INVISIBLE
+                binding.fabFilter.visibility = View.INVISIBLE
                 var totalBytes: Long = 0
                 for (pkg in mFreeApps) {
                     totalBytes += PackageUtils.getApkSize(applicationContext, pkg.packageName)
                 }
-                tv_free_size.text = Formatter
+                binding.toolbar.tvFreeSize.text = Formatter
                         .formatShortFileSize(
                                 applicationContext,
                                 totalBytes
                         )
             }
         }))
-        imgbtn_back.setOnClickListener {
+        binding.toolbar.imgbtnBack.setOnClickListener {
             mFreeApps.clear()
             systemAppUninstalled = false
-            imgbtn_back.visibility = View.GONE
-            tv_free_size.visibility = View.INVISIBLE
-            fab_sort.visibility = View.VISIBLE
-            fab_filter.visibility = View.VISIBLE
-            imgbtn_delete.visibility = View.GONE
+            binding.toolbar.imgbtnBack.visibility = View.GONE
+            binding.toolbar.tvFreeSize.visibility = View.INVISIBLE
+            binding.fabSort.visibility = View.VISIBLE
+            binding.fabFilter.visibility = View.VISIBLE
+            binding.toolbar.imgbtnDelete.visibility = View.GONE
             for (i in mApps.indices) mApps[i].color = R.color.backgroundPrimary
             mAdapter!!.notifyDataSetChanged()
         }
-        imgbtn_delete.setOnClickListener {
+        binding.toolbar.imgbtnDelete.setOnClickListener {
             MaterialDialog.Builder(this@MainActivity)
                     .content(R.string.uninstall_confirmation)
                     .positiveText(R.string.yes)
@@ -221,7 +223,7 @@ class MainActivity : AppCompatActivity() {
                                 packageInstaller.uninstall(mFreeApps[0].packageName, sender.intentSender);
                             } else {*/
                                 val packageUri = Uri.parse("package:" + mFreeApps[0].packageName)
-                                val uninstallIntent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri)
+                                val uninstallIntent = Intent(Intent.ACTION_DELETE, packageUri) //change to ACTION_DELETE from ACTION_UNINSTALL_PACKAGE
                                 uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
                                 startActivityForResult(uninstallIntent, 1)
                             //}
@@ -244,8 +246,8 @@ class MainActivity : AppCompatActivity() {
                     }
                     .show()
         }
-        layout_swiperefresh.setOnRefreshListener { refreshList() }
-        fab_filter.setOnClickListener {
+        binding.layoutSwiperefresh.setOnRefreshListener { refreshList() }
+        binding.fabFilter.setOnClickListener {
             MaterialDialog.Builder(this@MainActivity)
                     .title(R.string.filter)
                     .items(R.array.filter)
@@ -265,10 +267,10 @@ class MainActivity : AppCompatActivity() {
                                     Log.d(TAG, "System-> $count")
                                     runOnUiThread {
                                         mAdapter!!.notifyDataSetChanged()
-                                        layout_swiperefresh.isRefreshing = false
+                                        binding.layoutSwiperefresh.isRefreshing = false
                                     }
                                 })
-                                layout_swiperefresh.isRefreshing = true
+                                binding.layoutSwiperefresh.isRefreshing = true
                                 tSystem.start()
                             }
                             1 -> {
@@ -285,10 +287,10 @@ class MainActivity : AppCompatActivity() {
                                     Log.d(TAG, "User-> $count")
                                     runOnUiThread {
                                         mAdapter!!.notifyDataSetChanged()
-                                        layout_swiperefresh.isRefreshing = false
+                                        binding.layoutSwiperefresh.isRefreshing = false
                                     }
                                 })
-                                layout_swiperefresh.isRefreshing = true
+                                binding.layoutSwiperefresh.isRefreshing = true
                                 tUser.start()
                             }
                             2 -> {
@@ -303,10 +305,10 @@ class MainActivity : AppCompatActivity() {
                                     Log.d(TAG, "All-> $count")
                                     runOnUiThread {
                                         mAdapter!!.notifyDataSetChanged()
-                                        layout_swiperefresh.isRefreshing = false
+                                        binding.layoutSwiperefresh.isRefreshing = false
                                     }
                                 })
-                                layout_swiperefresh.isRefreshing = true
+                                binding.layoutSwiperefresh.isRefreshing = true
                                 tAll.start()
                             }
                             else -> {
@@ -317,7 +319,7 @@ class MainActivity : AppCompatActivity() {
                     .positiveText(R.string.done)
                     .show()
         }
-        fab_sort.setOnClickListener {
+        binding.fabSort.setOnClickListener {
             MaterialDialog.Builder(this@MainActivity)
                     .title(R.string.sort)
                     .items(R.array.sort)
@@ -359,18 +361,19 @@ class MainActivity : AppCompatActivity() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 when {
                     dy > 0 -> {
-                        fab_sort.hide()
-                        fab_filter.hide()
+                        binding.fabSort.hide()
+                        binding.fabFilter.hide()
                     }
                     dy < 0 && mFreeApps.size == 0 -> {
-                        fab_sort.show()
-                        fab_filter.show()
+                        binding.fabSort.show()
+                        binding.fabFilter.show()
                     }
                 }
             }
         })
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1) {
@@ -408,18 +411,18 @@ class MainActivity : AppCompatActivity() {
                     packageInstaller.uninstall(mFreeApps[0].packageName, sender.intentSender);
                 } else {*/
                     val packageUri = Uri.parse("package:" + mFreeApps[0].packageName)
-                    val uninstallIntent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri)
+                    val uninstallIntent = Intent(Intent.ACTION_DELETE, packageUri)
                     uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
                     startActivityForResult(uninstallIntent, 1)
                // }
             } else {
                 mFreeApps.clear()
-                imgbtn_delete!!.visibility = View.GONE
-                imgbtn_back!!.visibility = View.GONE
-                imgbtn_delete!!.visibility = View.INVISIBLE
-                tv_free_size!!.visibility = View.INVISIBLE
-                fab_sort!!.visibility = View.VISIBLE
-                fab_filter!!.visibility = View.VISIBLE
+                binding.toolbar.imgbtnDelete.visibility = View.GONE
+                binding.toolbar.imgbtnBack.visibility = View.GONE
+                binding.toolbar.imgbtnDelete.visibility = View.INVISIBLE
+                binding.toolbar.tvFreeSize.visibility = View.INVISIBLE
+                binding.fabSort.visibility = View.VISIBLE
+                binding.fabFilter.visibility = View.VISIBLE
                 mAdapter!!.notifyDataSetChanged()
                 try {
                     Toast.makeText(application.applicationContext,
@@ -488,14 +491,14 @@ class MainActivity : AppCompatActivity() {
                 }
                 runOnUiThread {
                     mAdapter!!.notifyDataSetChanged()
-                    imgbtn_back!!.visibility = View.GONE
-                    imgbtn_delete!!.visibility = View.GONE
-                    tv_free_size!!.visibility = View.INVISIBLE
-                    fab_sort!!.visibility = View.VISIBLE
-                    fab_filter!!.visibility = View.VISIBLE
+                    binding.toolbar.imgbtnBack.visibility = View.GONE
+                    binding.toolbar.imgbtnDelete.visibility = View.GONE
+                    binding.toolbar.tvFreeSize.visibility = View.INVISIBLE
+                    binding.fabSort.visibility = View.VISIBLE
+                    binding.fabFilter.visibility = View.VISIBLE
                     mFreeApps.clear()
                     systemAppUninstalled = false
-                    layout_swiperefresh!!.isRefreshing = false
+                    binding.layoutSwiperefresh.isRefreshing = false
                 }
             }
         }
@@ -564,9 +567,10 @@ class MainActivity : AppCompatActivity() {
         }
 
     }*/
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (mFreeApps.size == 0) super.onBackPressed() else {
-            imgbtn_back!!.callOnClick()
+            binding.toolbar.imgbtnBack.callOnClick()
         }
     }
 
@@ -578,8 +582,10 @@ class MainActivity : AppCompatActivity() {
             if (pkg.sourceDir.startsWith("/system")) systemAppUninstalled = true
             progressDialog!!.setTitle("Uninstalling " + pkg.packageName)
             runAsyncTask(object : AsyncTask<Void, Void, Boolean>() {
+                @Deprecated("Deprecated in Java")
                 override fun doInBackground(vararg voids: Void): Boolean = pkg.uninstallAppRoot()
 
+                @Deprecated("Deprecated in Java")
                 override fun onPostExecute(result: Boolean) {
                     if (result) {
                         progressDialog!!.setMessage(getString(R.string.uninstall_past_tense) + pkg.packageName)
@@ -618,12 +624,12 @@ class MainActivity : AppCompatActivity() {
                 for (i in mApps.indices) {
                     mApps[i].color = R.color.backgroundPrimary
                 }
-                imgbtn_delete!!.visibility = View.GONE
-                imgbtn_back!!.visibility = View.GONE
-                imgbtn_delete!!.visibility = View.INVISIBLE
-                tv_free_size!!.visibility = View.INVISIBLE
-                fab_sort!!.visibility = View.VISIBLE
-                fab_filter!!.visibility = View.VISIBLE
+                binding.toolbar.imgbtnDelete.visibility = View.GONE
+                binding.toolbar.imgbtnBack.visibility = View.GONE
+                binding.toolbar.imgbtnDelete.visibility = View.INVISIBLE
+                binding.toolbar.tvFreeSize.visibility = View.INVISIBLE
+                binding.fabSort.visibility = View.VISIBLE
+                binding.fabFilter.visibility = View.VISIBLE
                 mAdapter!!.notifyDataSetChanged()
                 if (systemAppUninstalled) {
                     MaterialDialog.Builder(this@MainActivity)
@@ -643,7 +649,7 @@ class MainActivity : AppCompatActivity() {
                 systemAppUninstalled = false
             }
         } else {
-            layout_swiperefresh!!.isRefreshing = true
+            binding.layoutSwiperefresh.isRefreshing = true
             val thread = Thread(Runnable {
                 mFreeApps.clear()
                 for (i in mApps.indices) {
@@ -652,14 +658,14 @@ class MainActivity : AppCompatActivity() {
                 appUninstallCancelled = false
                 runOnUiThread {
                     if (progressDialog!!.isShowing) progressDialog!!.dismiss()
-                    imgbtn_delete!!.visibility = View.GONE
-                    imgbtn_back!!.visibility = View.GONE
-                    imgbtn_delete!!.visibility = View.INVISIBLE
-                    tv_free_size!!.visibility = View.INVISIBLE
-                    fab_sort!!.visibility = View.VISIBLE
-                    fab_filter!!.visibility = View.VISIBLE
+                    binding.toolbar.imgbtnDelete.visibility = View.GONE
+                    binding.toolbar.imgbtnBack.visibility = View.GONE
+                    binding.toolbar.imgbtnDelete.visibility = View.INVISIBLE
+                    binding.toolbar.tvFreeSize.visibility = View.INVISIBLE
+                    binding.fabSort.visibility = View.VISIBLE
+                    binding.fabFilter.visibility = View.VISIBLE
                     mAdapter!!.notifyDataSetChanged()
-                    layout_swiperefresh!!.isRefreshing = false
+                    binding.layoutSwiperefresh.isRefreshing = false
                     systemAppUninstalled = false
                 }
             })

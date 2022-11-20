@@ -43,34 +43,34 @@ object PackageUtils {
 
 	fun isSystemApp(context: Context, packageName: String?): Boolean = try {
 		val pm = context.packageManager
-		val ai = pm.getApplicationInfo(packageName, 0)
+		val ai = pm.getApplicationInfo(packageName!!, 0)
 		ai.flags and ApplicationInfo.FLAG_SYSTEM != 0
 	} catch (e: PackageManager.NameNotFoundException) {
 		false
 	}
 
 	fun getInstalledDate(context: Context, packageName: String?): Long = try {
-		context.packageManager.getPackageInfo(packageName, PackageManager.GET_META_DATA).firstInstallTime
+		context.packageManager.getPackageInfo(packageName!!, PackageManager.GET_META_DATA).firstInstallTime
 	} catch (e: PackageManager.NameNotFoundException) {
 		0
 	}
 
 	fun getIcon(context: Context, package_name: String?): Bitmap? = try {
-		val icon = context.packageManager.getApplicationIcon(package_name)
+		val icon = context.packageManager.getApplicationIcon(package_name!!)
 		drawableToBitmap(icon)
 	} catch (e: PackageManager.NameNotFoundException) {
 		null
 	}
 
 	fun getApkSize(context: Context, package_name: String?): Long = try {
-		File(context.packageManager.getApplicationInfo(package_name, 0).publicSourceDir).length()
+		File(context.packageManager.getApplicationInfo(package_name!!, 0).publicSourceDir).length()
 	} catch (e: PackageManager.NameNotFoundException) {
 		0
 	}
 
 	fun getAppName(context: Context, package_name: String?): String? = try {
 		val pm = context.packageManager
-		pm.getApplicationLabel(pm.getApplicationInfo(package_name, PackageManager.GET_META_DATA)) as String
+		pm.getApplicationLabel(pm.getApplicationInfo(package_name!!, PackageManager.GET_META_DATA)) as String
 	} catch (e: PackageManager.NameNotFoundException) {
 		null
 	}

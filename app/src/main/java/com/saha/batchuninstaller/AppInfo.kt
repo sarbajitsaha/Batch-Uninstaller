@@ -33,7 +33,7 @@ class AppInfo(var packageName: String?, context: Context) {
 
 	init {
 		info = try {
-			context.packageManager.getApplicationInfo(packageName, 0)
+			packageName?.let { context.packageManager.getApplicationInfo(it, 0) }
 		} catch (e: PackageManager.NameNotFoundException) {
 			null
 		}

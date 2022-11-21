@@ -610,6 +610,7 @@ class MainActivity : AppCompatActivity() {
 
                 @Deprecated("Deprecated in Java")
                 override fun onPostExecute(result: Boolean) {
+                    Log.d("UNINSTALL","Result: $result")
                     if (result) {
                         progressDialog!!.setMessage(getString(R.string.uninstall_past_tense) + pkg.packageName)
                         progressDialog!!.incrementProgressBy(1)
@@ -618,6 +619,7 @@ class MainActivity : AppCompatActivity() {
                             if (mApps[i].packageName!!.compareTo(pkg.packageName) == 0) {
                                 mApps.removeAt(i)
                                 mAdapter!!.notifyDataSetChanged()
+                                break
                             }
                         }
                     } else {

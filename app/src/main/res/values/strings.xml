@@ -80,6 +80,9 @@
     <string name="not_root">Not Rooted</string>
     <string name="exit">Exit</string>
     <string name="denied_rationale">Cannot uninstall packages until this permission is granted in Android Q and above for non-root devices.</string>
+    <string name="save_profile">Save Profile</string>
+    <string name="cancel_profile">Cancel Profile</string>
+    <string name="profile_name">Profile Name</string>
 
     <!-- Arrays -->
     <string-array name="sort">

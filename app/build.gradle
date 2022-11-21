@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
-//apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 33
@@ -13,7 +13,7 @@ android {
         applicationId "com.saha.batchuninstaller"
         minSdkVersion 16
         targetSdkVersion 33
-        versionCode 11
+        versionCode 12
         versionName "0.99"
 
         multiDexEnabled true
@@ -57,6 +57,10 @@ dependencies {
     implementation 'com.github.nisrulz:recyclerviewhelper:27.1.1'
     implementation 'com.github.marcoscgdev:EasyLicensesDialog:2.0.0'
     implementation 'com.nabinbhandari.android:permissions:3.8'
+
+    implementation "androidx.room:room-runtime:2.4.3"
+    kapt "androidx.room:room-compiler:2.4.3"
+    implementation 'androidx.room:room-ktx:2.4.3'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'

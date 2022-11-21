@@ -23,8 +23,10 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import com.saha.batchuninstaller.BuildConfig
 import java.io.File
 import java.util.*
+import kotlin.collections.ArrayList
 
 object PackageUtils {
 	private fun drawableToBitmap(drawable: Drawable): Bitmap {
@@ -80,5 +82,21 @@ object PackageUtils {
 		val pkgNames: MutableList<String> = ArrayList()
 		pkgs.forEach { pkgNames.add(it.packageName) }
 		return pkgNames
+	}
+
+	fun moveBatchUninstallerToEnd(mFreeApps: ArrayList<ApplicationInfo>) {
+		lateinit var batchUninstallerAppInfo : ApplicationInfo
+		var index = -1
+		for(i in mFreeApps.indices) {
+			if (mFreeApps[i].packageName.equals(BuildConfig.APPLICATION_ID)) {
+				batchUninstallerAppInfo = mFreeApps[i]
+				index = i
+				break
+			}
+		}
+		if (index != -1) {
+			mFreeApps.removeAt(index)
+			mFreeApps.add(batchUninstallerAppInfo)
+		}
 	}
 }

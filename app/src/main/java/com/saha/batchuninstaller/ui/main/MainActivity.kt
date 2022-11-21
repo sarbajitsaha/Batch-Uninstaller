@@ -39,13 +39,17 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
 import com.afollestad.materialdialogs.MaterialDialog
 import com.marcoscg.easylicensesdialog.EasyLicensesDialogCompat
 import com.saha.batchuninstaller.AppInfo
+import com.saha.batchuninstaller.BuildConfig
 import com.saha.batchuninstaller.R
+import com.saha.batchuninstaller.RoomStorage.AppDatabase
 import com.saha.batchuninstaller.databinding.ActivityMainBinding
 import com.saha.batchuninstaller.ui.main.adapters.AppInfoAdapter
 import com.saha.batchuninstaller.utils.PackageUtils
+import com.saha.batchuninstaller.utils.PackageUtils.moveBatchUninstallerToEnd
 import com.saha.batchuninstaller.utils.RootUtils.uninstallAppRoot
 import com.stericson.RootTools.RootTools
 import github.nisrulz.recyclerviewhelper.RVHItemClickListener
@@ -53,10 +57,12 @@ import github.nisrulz.recyclerviewhelper.RVHItemDividerDecoration
 import github.nisrulz.recyclerviewhelper.RVHItemTouchHelperCallback
 import java.util.*
 import java.util.concurrent.ExecutionException
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
 	private var mAdapter: AppInfoAdapter? = null
 	private var mApps: ArrayList<AppInfo> = arrayListOf()
+    private lateinit var mAppsCopy : ArrayList<AppInfo>
 	private var mPkgs: List<String> = arrayListOf()
 	private var mFreeApps: ArrayList<ApplicationInfo> = arrayListOf()
 
@@ -69,16 +75,24 @@ class MainActivity : AppCompatActivity() {
 	private var appUninstallCancelled = false
 	private var systemAppUninstalled = false
 
-	@SuppressLint("NotifyDataSetChanged")
+    private lateinit var db : AppDatabase
+
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
-		setContentView(view)
-		val mRvAppList = findViewById<RecyclerView>(R.id.rv_applist)
+        setContentView(view)
+        val mRvAppList = findViewById<RecyclerView>(R.id.rv_applist)
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this)
 		mEditor = mPrefs.edit()
 		//initialization
+        db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "profiledb"
+        ).allowMainThreadQueries().build()
+        //Bad practice to allow main thread queries but db should be small,
+        //its a headache to now support co routines for a simple db operation
 		appUninstallCancelled = false
 
 		//day night mode
@@ -95,6 +109,7 @@ class MainActivity : AppCompatActivity() {
 		binding.toolbar.tvFreeSize.visibility = View.INVISIBLE
 		binding.toolbar.imgbtnBack.visibility = View.GONE
         binding.toolbar.imgbtnDelete.visibility = View.GONE
+        binding.toolbar.root.popupTheme = R.style.AppTheme
 		setSupportActionBar(binding.toolbar.toolbar)
 
 		//show dialog for root and non-root phones. If root ask for permission
@@ -119,32 +134,17 @@ class MainActivity : AppCompatActivity() {
 					.show()
 		}
 
-        //For Android Q and above, we need this permission to delete packages for non root phones
-        /*if (!RootTools.isAccessGiven() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            Permissions.check(this, REQUEST_DELETE_PACKAGES, null, object : PermissionHandler() {
-                override fun onGranted() {
-                    Toast.makeText(applicationContext, R.string.granted, Toast.LENGTH_SHORT).show()
-                }
-
-                override fun onDenied(context: Context?, deniedPermissions: ArrayList<String>?) {
-                    MaterialDialog.Builder(this@MainActivity)
-                            .title(R.string.denied)
-                            .content(R.string.denied_rationale)
-                            .neutralText(R.string.exit)
-                            .onAny { _, _ -> finish() }
-                            .show()
-
-                }
-            })
-        }*/
-
-
         //populate lists with installed apps and details
         mPkgs = PackageUtils.getPackageNames(applicationContext)
         Log.d(TAG, "All-> " + mPkgs.size)
         for (pkg in mPkgs) {
             mApps.add(AppInfo(pkg, this))
         }
+        //sort by installed data descending as default
+        mApps.sortWith(Comparator { o1: AppInfo, o2: AppInfo -> if (o1.firstInstallTime < o2.firstInstallTime) 1 else -1 })
+        mAppsCopy = mApps
+
+        //populate the recyclerview
         mAdapter = AppInfoAdapter(this, mApps)
         mRvAppList.layoutManager = LinearLayoutManager(this)
         mRvAppList.adapter = mAdapter
@@ -215,18 +215,14 @@ class MainActivity : AppCompatActivity() {
                     .onPositive { dialog, _ ->
                         // delete apps
                         dialog.dismiss()
+                        // If batch uninstaller itself is chosen, delete it at the end
+                        moveBatchUninstallerToEnd(mFreeApps)
                         if (!RootTools.isAccessGiven()) {
-                           /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                val packageInstaller = this.packageManager.packageInstaller
-                                val uninstallIntent = Intent(this, this.javaClass)
-                                val sender = PendingIntent.getActivity(this, 0, uninstallIntent, 0)
-                                packageInstaller.uninstall(mFreeApps[0].packageName, sender.intentSender);
-                            } else {*/
-                                val packageUri = Uri.parse("package:" + mFreeApps[0].packageName)
-                                val uninstallIntent = Intent(Intent.ACTION_DELETE, packageUri) //change to ACTION_DELETE from ACTION_UNINSTALL_PACKAGE
-                                uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
-                                startActivityForResult(uninstallIntent, 1)
-                            //}
+                            val packageUri = Uri.parse("package:" + mFreeApps[0].packageName)
+                            val uninstallIntent = Intent(Intent.ACTION_DELETE, packageUri)
+                            //changed to ACTION_DELETE from ACTION_UNINSTALL_PACKAGE
+                            uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
+                            startActivityForResult(uninstallIntent, 1)
                         } else {
                             appUninstallCancelled = false
                             progressDialog = ProgressDialog(this@MainActivity)
@@ -373,11 +369,47 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    fun uninstallAppsFromProfile(freeAppsFromProfile: ArrayList<ApplicationInfo>) {
+        if (freeAppsFromProfile.size == 0) {
+            Toast.makeText(this, "Application already deleted", Toast.LENGTH_SHORT).show()
+            return
+        }
+        mFreeApps = freeAppsFromProfile
+        moveBatchUninstallerToEnd(mFreeApps)
+        if (!RootTools.isAccessGiven()) {
+            val packageUri = Uri.parse("package:" + mFreeApps[0].packageName)
+            val uninstallIntent = Intent(Intent.ACTION_DELETE, packageUri)
+            //changed to ACTION_DELETE from ACTION_UNINSTALL_PACKAGE
+            uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
+            startActivityForResult(uninstallIntent, 1)
+        } else {
+            appUninstallCancelled = false
+            progressDialog = ProgressDialog(this@MainActivity)
+            progressDialog!!.max = mFreeApps.size
+            progressDialog!!.setTitle(R.string.uninstall_trailing)
+            progressDialog!!.setCancelable(false)
+            progressDialog!!.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel)
+            ) { _, _ ->
+                Log.i(TAG, "Uninstall cancelled")
+                mFreeApps.clear()
+                appUninstallCancelled = true
+            }
+            progressDialog!!.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
+            progressDialog!!.show()
+            uninstallAppRoot()
+        }
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
+                if (mFreeApps.isEmpty()) {
+                    Toast.makeText(application.applicationContext,
+                        R.string.uninstall_complete, Toast.LENGTH_SHORT).show()
+                    return
+                }
                 val packageName = mFreeApps[0].packageName
                 for (i in mApps.indices) {
                     if (mApps[i].packageName!!.compareTo(packageName) == 0) {
@@ -387,6 +419,11 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } else {
+                if (mFreeApps.isEmpty()) {
+                    Toast.makeText(application.applicationContext,
+                        R.string.uninstall_fail, Toast.LENGTH_SHORT).show()
+                    return
+                }
                 val packageName = mFreeApps[0].packageName
                 for (i in mApps.indices) {
                     if (mApps[i].packageName!!.compareTo(packageName) == 0) {
@@ -403,18 +440,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             mFreeApps.removeAt(0)
+            Log.d("MainActivity","${mFreeApps.size} + size of free apps")
             if (mFreeApps.size != 0) {
-               /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    val packageInstaller = this.packageManager.packageInstaller
-                    val uninstallIntent = Intent(this, this.javaClass)
-                    val sender = PendingIntent.getActivity(this, 0, uninstallIntent, 0)
-                    packageInstaller.uninstall(mFreeApps[0].packageName, sender.intentSender);
-                } else {*/
-                    val packageUri = Uri.parse("package:" + mFreeApps[0].packageName)
-                    val uninstallIntent = Intent(Intent.ACTION_DELETE, packageUri)
-                    uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
-                    startActivityForResult(uninstallIntent, 1)
-               // }
+                val packageUri = Uri.parse("package:" + mFreeApps[0].packageName)
+                val uninstallIntent = Intent(Intent.ACTION_DELETE, packageUri)
+                uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
+                startActivityForResult(uninstallIntent, 1)
             } else {
                 mFreeApps.clear()
                 binding.toolbar.imgbtnDelete.visibility = View.GONE
@@ -458,6 +489,11 @@ class MainActivity : AppCompatActivity() {
                 rate()
                 true
             }
+            R.id.profiles -> {
+                val profileDialogFragment = ProfileDialogFragment.newInstance(mAppsCopy, this@MainActivity, db)
+                profileDialogFragment.show(supportFragmentManager, ProfileDialogFragment.TAG)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -489,6 +525,9 @@ class MainActivity : AppCompatActivity() {
                 for (pkg in mPkgs) {
                     mApps.add(AppInfo(pkg, applicationContext))
                 }
+                //sort by installed data descending as default
+                mApps.sortWith(Comparator { o1: AppInfo, o2: AppInfo -> if (o1.firstInstallTime < o2.firstInstallTime) 1 else -1 })
+                mAppsCopy = mApps
                 runOnUiThread {
                     mAdapter!!.notifyDataSetChanged()
                     binding.toolbar.imgbtnBack.visibility = View.GONE
@@ -551,22 +590,6 @@ class MainActivity : AppCompatActivity() {
                 .show()
     }
 
-    /*    private void donate_package() {
-
-        String donate_package = "com.saha.batchuninstaller.donate";
-        Uri uri = Uri.parse("market://details?id=" + donate_package);
-        Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
-        goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
-                Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
-                Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        try {
-            startActivity(goToMarket);
-        } catch (ActivityNotFoundException e) {
-            startActivity(new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("https://play.google.com/store/apps/details?id=" + donate_package)));
-        }
-
-    }*/
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (mFreeApps.size == 0) super.onBackPressed() else {
